@@ -43,19 +43,20 @@ public class Manage {
 
         NodeList list = inputDoc.getElementsByTagName("service");
         Element e = (Element) list.item(0);
-        if (e.getAttribute("sid").equals("S01")) {
-            return null;
-        }else{
-            return createXMLFailed(203).asXML();
+        if (list.getLength() > 0) {
+            if (e.getAttribute("sid").equals("S01")) {
+                return null;
+            }
         }
+        return createXMLFailed(203).asXML();
     }
-    
-    private org.dom4j.Document createXMLFailed(int error){
+
+    private org.dom4j.Document createXMLFailed(int error) {
         org.dom4j.Document d = new DefaultDocument();
-        if(error == 203){
+        if (error == 203) {
             org.dom4j.Element root = d.addElement("secuotp").addAttribute("status", "203");
-                root.addElement("service").addText("Register End-User");
-                root.addElement("message").addText("Your XML Input Sid Mismatch");
+            root.addElement("service").addText("Register End-User");
+            root.addElement("message").addText("Your XML Input Sid Mismatch");
         }
         d.normalize();
         return d;
