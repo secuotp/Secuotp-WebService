@@ -5,12 +5,12 @@
  */
 package com.secuotp.services;
 
-import com.secuotp.model.People;
 import com.secuotp.model.Site;
 import com.secuotp.model.SiteUser;
 import com.secuotp.model.xml.XMLCreate;
 import java.io.IOException;
 import java.io.StringReader;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -44,7 +44,7 @@ public class Manage {
     @Path("/end-user")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String registerEndUser(@FormParam("request") String xml) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException {
+    public String registerEndUser(@FormParam("request") String xml) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NoSuchAlgorithmException {
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -62,14 +62,17 @@ public class Manage {
                     if (Site.authenService(domain, serial)) {
                         String[] tagString = {"username", "email", "fname", "lname", "phone"};
                         SiteUser user = getXMLParameter(list, tagString);
-                       
+                        SiteUser.addSiteUser(user, domain, serial);
+
+                        return XMLCreate.createXML(100, "Register End-User", "Register End-User Completed").asXML();
+
                     } else {
-                        return XMLCreate.createXMLFailed(300, "Register End-User").asXML();
+                        return XMLCreate.createXML(300, "Register End-User", "Failed to Register End-User: Not Allowed to Register End-User").asXML();
                     }
                 }
             }
         }
-        return XMLCreate.createXMLFailed(203, "Register End-User").asXML();
+        return XMLCreate.createXML(203, "Register End-User", "Your XML Input Mismatch: Please check XML Request Body").asXML();
     }
 
     private void getDomainSerial(NodeList list, String domainTag, String serialTag) {
@@ -83,34 +86,34 @@ public class Manage {
             serial = list.item(0).getTextContent();
         }
     }
-    
-    private SiteUser getXMLParameter(NodeList list, String[] tag){
+
+    private SiteUser getXMLParameter(NodeList list, String[] tag) {
         SiteUser user = new SiteUser();
         list = doc.getElementsByTagName(tag[0]);
-        if(list.getLength() > 0){
+        if (list.getLength() > 0) {
             user.setUsername(list.item(0).getTextContent());
         }
-        
+
         list = doc.getElementsByTagName(tag[1]);
-        if(list.getLength() > 0){
+        if (list.getLength() > 0) {
             user.setEmail(list.item(0).getTextContent());
         }
-        
+
         list = doc.getElementsByTagName(tag[2]);
-        if(list.getLength() > 0){
+        if (list.getLength() > 0) {
             user.setFirstname(list.item(0).getTextContent());
         }
-        
+
         list = doc.getElementsByTagName(tag[3]);
-        if(list.getLength() > 0){
+        if (list.getLength() > 0) {
             user.setLastname(list.item(0).getTextContent());
         }
-        
+
         list = doc.getElementsByTagName(tag[4]);
-        if(list.getLength() > 0){
+        if (list.getLength() > 0) {
             user.setPhone(list.item(0).getTextContent());
         }
-        
+
         return user;
     }
 }

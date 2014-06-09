@@ -91,9 +91,18 @@ public class SiteUser extends People {
             String siteId = getSiteId(con, domainName, serialNumber);
             
             String userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
-            String removalCode = SerialNumber.generateSerialNumber(user.getFirstname()+user.getLastname());
+            String removalCode = SerialNumber.generateRemovalCode(user.getFirstname()+user.getLastname());
             
+            sql = "INSERT INTO site_user (site_id, people_id, phone_number, serial_number, removal_code, mobile_mode) VALUES (?,?,?,?,?,0)";
+            ps = con.prepareCall(sql);
+            ps.clearParameters();
+            ps.setInt(1, Integer.parseInt(siteId));
+            ps.setInt(2, Integer.parseInt(peopleId));
+            ps.setString(3, user.getPhone());
+            ps.setString(4, userSerialNumber);
+            ps.setString(5, removalCode);
             
+            row = ps.executeUpdate();
         }
     }
 

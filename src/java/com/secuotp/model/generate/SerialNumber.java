@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  *
@@ -18,48 +19,50 @@ import java.util.List;
 public class SerialNumber {
 
     public static String generateSerialNumber(String seed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
         String sha1 = encrypt(seed, "SHA-512");
-        String sha2 = encrypt(sha1, "SHA-512");
-        String sha3 = encrypt(sha1 + sha2, "SHA-512");
-        String newSeed = sha1 + sha2 + sha3;
-
-        List<Integer> li = new ArrayList();
-        for (int i = 0; i < 16; i++) {
-            int rand = (int) Math.round(Math.random() * 384);
-            if (li.isEmpty()) {
-                li.add(rand);
-            } else {
-                boolean test = true;
-                for (int j = 0; j < li.size(); j++) {
-                    if (li.get(j) == rand) {
-                        test = false;
-                    }
-                }
-                if (test == false) {
-                    i--;
-                } else {
-                    li.add(rand);
-                }
-            }
-        }
-
-        char[] serial = new char[19];
         int count = 0;
-        for (int i = 0; i < serial.length; i++) {
-            if ((i+1) % 5 != 0) {
-                serial[i] = newSeed.charAt(li.get(count++));
+        int a = 0;
+        int b = 4;
+        String text = "";
+
+        for (int i = 0; i < 23; i++) {
+            if ((count + 1) % 6 != 0) {
+                int seedNum = Integer.parseInt(sha1.substring(a, b), 16);
+                text = text + CirQueue.count(((int) (Math.round(Math.random() * 36) ^ seedNum) + seedNum));
             } else {
-                serial[i] = '-';
+                text = text + "-";
             }
+            count++;
+            a += 5;
+            b += 5;
         }
-        return String.valueOf(serial).toUpperCase();
+        return text;
+    }
+
+    public static String generateRemovalCode(String seed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
+        String sha1 = encrypt(seed, "MD5");
+        int count = 0;
+        int a = 0;
+        int b = 2;
+        String text = "";
+
+        for (int i = 0; i < 10; i++) {
+            int seedNum = Integer.parseInt(sha1.substring(a, b), 16);
+            text = text + CirQueue.count(((int) ~(Math.round(Math.random() * 36) | seedNum) * (-seedNum)));
+
+            a += 3;
+            b += 3;
+        }
+        return text;
     }
 
     private static String encrypt(String seed, String method) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         StringBuilder hexString = new StringBuilder();
         MessageDigest stringDigest = MessageDigest.getInstance(method);
         byte[] buffer = stringDigest.digest(seed.getBytes("utf-8"));
-        
+
         for (int i = 0; i < buffer.length; i++) {
             if ((0xff & buffer[i]) < 0x10) {
                 hexString.append("0").append(Integer.toHexString((0xFF & buffer[i])));
@@ -69,5 +72,10 @@ public class SerialNumber {
         }
 
         return hexString.toString();
+    }
+
+    public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        System.out.println(generateSerialNumber("Hello"));
+        System.out.println(generateRemovalCode("Hello"));
     }
 }
