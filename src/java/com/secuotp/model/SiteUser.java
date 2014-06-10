@@ -78,35 +78,27 @@ public class SiteUser extends People {
 
     public static void addSiteUser(SiteUser user, String domainName, String serialNumber) throws ClassNotFoundException, SQLException, NoSuchAlgorithmException, UnsupportedEncodingException {
         Connection con = ConnectionAgent.getInstance();
-        String sql = "INSERT INTO people (username, email, firstname, lastname) VALUES (?, ?, ?, ?)";
-        PreparedStatement ps = con.prepareCall(sql);
-        ps.setString(1, user.getUsername());
-        ps.setString(2, user.getEmail());
-        ps.setString(3, user.getFirstname());
-        ps.setString(4, user.getLastname());
+        String siteId = getSiteId(con, domainName, serialNumber);
 
-        int row = ps.executeUpdate();
-        if (row > 0) {
-            String peopleId = getPeopleId(con, user.getEmail());
-            String siteId = getSiteId(con, domainName, serialNumber);
-            
-            String userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
-            String removalCode = SerialNumber.generateRemovalCode(user.getFirstname()+user.getLastname());
-            while(!(isNotDuplicate(userSerialNumber))){
-                userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
-            }
-            
-            sql = "INSERT INTO site_user (site_id, people_id, phone_number, serial_number, removal_code, mobile_mode) VALUES (?,?,?,?,?,0)";
-            ps = con.prepareCall(sql);
-            ps.clearParameters();
-            ps.setInt(1, Integer.parseInt(siteId));
-            ps.setInt(2, Integer.parseInt(peopleId));
-            ps.setString(3, user.getPhone());
-            ps.setString(4, userSerialNumber);
-            ps.setString(5, removalCode);
-            
-            row = ps.executeUpdate();
+        String userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
+        String removalCode = SerialNumber.generateRemovalCode(user.getFirstname() + user.getLastname());
+        while (!(isNotDuplicate(userSerialNumber))) {
+            userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
         }
+        
+        String sql = "INSERT INTO site_user (site_id, username, email, firstname, lastname, phone_number, serial_number, removal_code, mobile_mode) VALUES (?,?,?,?,?,?,?,?,0)";
+        PreparedStatement ps = con.prepareCall(sql);
+        ps.setInt(1, Integer.parseInt(siteId));
+        ps.setString(2, user.getUsername());
+        ps.setString(3, user.getEmail());
+        ps.setString(4, user.getFirstname());
+        ps.setString(5, user.getLastname());
+        ps.setString(6, user.getPhone());
+        ps.setString(7, userSerialNumber);
+        ps.setString(8, removalCode);
+        
+        ps.executeUpdate();
+
     }
 
     private static String getPeopleId(Connection con, String email) throws SQLException {
@@ -127,20 +119,20 @@ public class SiteUser extends People {
         ps.setString(1, domainName);
         ps.setString(2, serialNumber);
         ResultSet rs = ps.executeQuery();
-        
+
         if (rs.next()) {
             return "" + rs.getInt(1);
         }
         return null;
     }
-    
-    private static boolean isNotDuplicate(String serialNumber) throws SQLException, ClassNotFoundException{
+
+    private static boolean isNotDuplicate(String serialNumber) throws SQLException, ClassNotFoundException {
         String sql = "SELECT COUNT(*) FROM site_user WHERE serial_number = ?";
         Connection con = ConnectionAgent.getInstance();
         PreparedStatement ps = con.prepareCall(sql);
         ps.setString(1, serialNumber);
         ResultSet rs = ps.executeQuery();
-        if(rs.next()){
+        if (rs.next()) {
             return rs.getInt(1) == 0;
         }
         return false;
