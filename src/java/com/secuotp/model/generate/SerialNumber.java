@@ -26,7 +26,7 @@ public class SerialNumber {
         for (int i = 0; i < 23; i++) {
             if ((count + 1) % 6 != 0) {
                 int seedNum = Integer.parseInt(sha1.substring(a, b), 16);
-                text = text + CirQueue.count(((int) (Math.round(Math.random() * 36) ^ seedNum) + seedNum));
+                text = text + SerialQueue.count(((int) (Math.round(Math.random() * 36) ^ seedNum) + seedNum));
             } else {
                 text = text + "-";
             }
@@ -47,7 +47,7 @@ public class SerialNumber {
 
         for (int i = 0; i < 10; i++) {
             int seedNum = Integer.parseInt(sha1.substring(a, b), 16);
-            text = text + CirQueue.count(((int)(Math.round(Math.random() * 36) * seedNum) - (seedNum)));
+            text = text + SerialQueue.count(((int)(Math.round(Math.random() * 36) * seedNum) - (seedNum)));
 
             a += 3;
             b += 3;
@@ -69,10 +69,5 @@ public class SerialNumber {
         }
 
         return hexString.toString();
-    }
-
-    public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        System.out.println(generateSerialNumber("Hello"));
-        System.out.println(generateRemovalCode("Hello"));
     }
 }

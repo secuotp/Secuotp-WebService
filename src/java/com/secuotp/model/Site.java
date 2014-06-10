@@ -10,6 +10,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -72,15 +74,21 @@ public class Site {
         this.imgPath = imgPath;
     }
 
-    public static boolean authenService(String domain, String serial) throws ClassNotFoundException, SQLException {
-        Connection con = ConnectionAgent.getInstance();
-        String sql = "SELECT COUNT(*) FROM site WHERE domain = ? AND serial_number = ?";
-        PreparedStatement ps = con.prepareCall(sql);
-        ps.setString(1, domain);
-        ps.setString(2, serial);
-        ResultSet rs = ps.executeQuery();
-        if(rs.next()){
-            return rs.getInt(1) > 0;
+    public static boolean authenService(String domain, String serial) {
+        try {
+            Connection con = ConnectionAgent.getInstance();
+            String sql = "SELECT COUNT(*) FROM site WHERE domain = ? AND serial_number = ?";
+            PreparedStatement ps = con.prepareCall(sql);
+            ps.setString(1, domain);
+            ps.setString(2, serial);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                return rs.getInt(1) > 0;
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Site.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Site.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }

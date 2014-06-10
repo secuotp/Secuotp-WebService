@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -76,7 +78,7 @@ public class SiteUser extends People {
 
     }
 
-    public static void addSiteUser(SiteUser user, String domainName, String serialNumber) throws ClassNotFoundException, SQLException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static boolean addSiteUser(SiteUser user, String domainName, String serialNumber) throws ClassNotFoundException, SQLException, NoSuchAlgorithmException, UnsupportedEncodingException {
         Connection con = ConnectionAgent.getInstance();
         String siteId = getSiteId(con, domainName, serialNumber);
 
@@ -85,7 +87,7 @@ public class SiteUser extends People {
         while (!(isNotDuplicate(userSerialNumber))) {
             userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
         }
-        
+
         String sql = "INSERT INTO site_user (site_id, username, email, firstname, lastname, phone_number, serial_number, removal_code, mobile_mode) VALUES (?,?,?,?,?,?,?,?,0)";
         PreparedStatement ps = con.prepareCall(sql);
         ps.setInt(1, Integer.parseInt(siteId));
@@ -96,8 +98,9 @@ public class SiteUser extends People {
         ps.setString(6, user.getPhone());
         ps.setString(7, userSerialNumber);
         ps.setString(8, removalCode);
-        
-        ps.executeUpdate();
+
+        int row = ps.executeUpdate();
+        return row > 0;
 
     }
 
@@ -134,6 +137,24 @@ public class SiteUser extends People {
         ResultSet rs = ps.executeQuery();
         if (rs.next()) {
             return rs.getInt(1) == 0;
+        }
+        return false;
+    }
+
+    public static boolean disableEndUser(String username, String removalCode) {
+        try {
+            Connection con = ConnectionAgent.getInstance();
+            String sql = "DELETE FROM site_user WHERE username = ? AND removal_code = ?";
+            PreparedStatement ps = con.prepareCall(sql);
+            ps.setString(1, username);
+            ps.setString(2, removalCode);
+            
+            int row = ps.executeUpdate();
+            return row > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(SiteUser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(SiteUser.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }
