@@ -13,6 +13,7 @@ import java.io.StringReader;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -37,31 +38,28 @@ public class Manage {
     private String domain;
     private String serial;
 
-    private Document doc;
-    private NodeList list;
-
     @POST
-    @Path("/end-user")
+    @Path("/register/end-user")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public String registerEndUser(@FormParam("request") String xml) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NoSuchAlgorithmException {
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        doc = dBuilder.parse(new InputSource(new StringReader(xml)));
+        Document doc = dBuilder.parse(new InputSource(new StringReader(xml)));
         doc.normalize();
 
-        list = doc.getElementsByTagName("service");
+        NodeList list = doc.getElementsByTagName("service");
         Element e = (Element) list.item(0);
 
         if (list.getLength() > 0) {
-            if (e.getAttribute("sid").equals("S01")) {
-                getDomainSerial(list, "domain", "serial");
+            if (e.getAttribute("sid").equals("S-01")) {
+                s01GetDomainSerial(doc, list, "domain", "serial");
 
                 if (domain != null && serial != null) {
                     if (Site.authenService(domain, serial)) {
                         String[] tagString = {"username", "email", "fname", "lname", "phone"};
-                        SiteUser user = getXMLParameter(list, tagString);
+                        SiteUser user = s01GetXMLParameter(doc, list, tagString);
                         SiteUser.addSiteUser(user, domain, serial);
 
                         return XMLCreate.createXML(100, "Register End-User", "Register End-User Completed").asXML();
@@ -75,7 +73,25 @@ public class Manage {
         return XMLCreate.createXML(203, "Register End-User", "Your XML Input Mismatch: Please check XML Request Body").asXML();
     }
 
-    private void getDomainSerial(NodeList list, String domainTag, String serialTag) {
+    @POST
+    @Path("/disable/end-user")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    public String disableEndUser(@FormParam("request") String xml) throws ParserConfigurationException, SAXException, IOException {
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(new InputSource(new StringReader(xml)));
+        doc.normalize();
+
+        NodeList list = doc.getElementsByTagName("service");
+        Element e = (Element) list.item(0);
+        if (e.getAttribute("sid").equals("S-02")) {
+            
+        }
+        return XMLCreate.createXML(203, "Disable End-User", "Your XML Input Mismatch: Please check XML Request Body").asXML();
+    }
+
+    private void s01GetDomainSerial(Document doc, NodeList list, String domainTag, String serialTag) {
         list = doc.getElementsByTagName("domain");
         if (list.getLength() > 0) {
             domain = list.item(0).getTextContent();
@@ -87,7 +103,7 @@ public class Manage {
         }
     }
 
-    private SiteUser getXMLParameter(NodeList list, String[] tag) {
+    private SiteUser s01GetXMLParameter(Document doc, NodeList list, String[] tag) {
         SiteUser user = new SiteUser();
         list = doc.getElementsByTagName(tag[0]);
         if (list.getLength() > 0) {
