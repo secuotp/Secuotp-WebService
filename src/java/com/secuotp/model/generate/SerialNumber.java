@@ -47,7 +47,7 @@ public class SerialNumber {
 
         for (int i = 0; i < 10; i++) {
             int seedNum = Integer.parseInt(sha1.substring(a, b), 16);
-            text = text + CirQueue.count(((int) ~(Math.round(Math.random() * 36) | seedNum) * (-seedNum)));
+            text = text + CirQueue.count(((int)(Math.round(Math.random() * 36) * seedNum) - (seedNum)));
 
             a += 3;
             b += 3;

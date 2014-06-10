@@ -92,6 +92,9 @@ public class SiteUser extends People {
             
             String userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
             String removalCode = SerialNumber.generateRemovalCode(user.getFirstname()+user.getLastname());
+            while(!(isNotDuplicate(userSerialNumber))){
+                userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
+            }
             
             sql = "INSERT INTO site_user (site_id, people_id, phone_number, serial_number, removal_code, mobile_mode) VALUES (?,?,?,?,?,0)";
             ps = con.prepareCall(sql);
@@ -129,5 +132,17 @@ public class SiteUser extends People {
             return "" + rs.getInt(1);
         }
         return null;
+    }
+    
+    private static boolean isNotDuplicate(String serialNumber) throws SQLException, ClassNotFoundException{
+        String sql = "SELECT COUNT(*) FROM site_user WHERE serial_number = ?";
+        Connection con = ConnectionAgent.getInstance();
+        PreparedStatement ps = con.prepareCall(sql);
+        ps.setString(1, serialNumber);
+        ResultSet rs = ps.executeQuery();
+        if(rs.next()){
+            return rs.getInt(1) == 0;
+        }
+        return false;
     }
 }
