@@ -21,6 +21,6 @@ public class StringText {
     
     //==================================   DISABLE END USER   =========================================
     public static final String DISABLE_END_USER_100 = "Disable End-User Completed";
-    public static final String DISABLE_END_USER_200 = "Failed to Register End-User: Unable Disable End-User";
-    public static final String DISABLE_END_USER_300 = "Failed to Register End-User: Not Allowed to Disable End-User";
+    public static final String DISABLE_END_USER_200 = "Failed to Disable End-User: Unable Disable End-User";
+    public static final String DISABLE_END_USER_300 = "Failed to Disable End-User: Not Allowed to Disable End-User";
 }
