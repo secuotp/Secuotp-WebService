@@ -20,8 +20,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -38,7 +36,7 @@ public class Manage {
     public String registerEndUser(@FormParam("request") String xml) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NoSuchAlgorithmException {
         XMLParse parse = new XMLParse(xml);
 
-        if (parse.getAttibuteFromTag("service", "sid", 0).equals("S-01")) {
+        if (parse.getAttibuteFromTag("service", "sid", 0).equals("M-01")) {
             String domain = parse.getDataFromTag("domain", 0);
             String serial = parse.getDataFromTag("serial", 0);
 
@@ -70,7 +68,7 @@ public class Manage {
     @Produces(MediaType.APPLICATION_XML)
     public String disableEndUser(@FormParam("request") String xml) {
         XMLParse parse = new XMLParse(xml);
-        if (parse.getAttibuteFromTag("service", "sid", 0).equals("S-02")) {
+        if (parse.getAttibuteFromTag("service", "sid", 0).equals("M-02")) {
             String domain = parse.getDataFromTag("domain", 0);
             String serial = parse.getDataFromTag("serial", 0);
             if (domain != null && serial != null) {
