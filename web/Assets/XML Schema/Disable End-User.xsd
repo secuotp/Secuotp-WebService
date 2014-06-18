@@ -1,0 +1,33 @@
+<xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xsd:element name="secuotp">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="service">
+          <xsd:complexType>
+            <xsd:simpleContent>
+              <xsd:extension base="xs:string">
+                <xsd:attribute type="xs:string" name="sid"/>
+              </xsd:extension>
+            </xsd:simpleContent>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="authentication">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element type="xs:string" name="domain"/>
+              <xsd:element type="xs:string" name="serial"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="parameter">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element type="xs:string" name="username"/>
+              <xsd:element type="xs:string" name="code"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>

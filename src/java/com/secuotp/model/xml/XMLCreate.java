@@ -15,7 +15,7 @@ import org.dom4j.tree.DefaultDocument;
  */
 public class XMLCreate {
 
-    public static Document createXML(int error, String service, String message) {
+    public static Document createResponseXML(int error, String service, String message) {
         Document d = new DefaultDocument();
 
         Element root = d.addElement("secuotp").addAttribute("status", "" + error);

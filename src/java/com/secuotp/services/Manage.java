@@ -10,6 +10,8 @@ import com.secuotp.model.SiteUser;
 import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParse;
+import com.secuotp.model.xml.XMLValidate;
+import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -35,7 +37,7 @@ public class Manage {
     @Produces(MediaType.APPLICATION_XML)
     public String registerEndUser(@FormParam("request") String xml) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NoSuchAlgorithmException {
         XMLParse parse = new XMLParse(xml);
-
+        
         if (parse.getAttibuteFromTag("service", "sid", 0).equals("M-01")) {
             String domain = parse.getDataFromTag("domain", 0);
             String serial = parse.getDataFromTag("serial", 0);
@@ -50,16 +52,16 @@ public class Manage {
                     user.setPhone(parse.getDataFromTag("phone", 0));
 
                     if (SiteUser.addSiteUser(user, domain, serial)) {
-                        return XMLCreate.createXML(100, "Register End-User", StringText.REGISTER_END_USER_100).asXML();
+                        return XMLCreate.createResponseXML(100, "Register End-User", StringText.REGISTER_END_USER_100).asXML();
                     } else {
-                        return XMLCreate.createXML(200, "Register End-User", StringText.REGISTER_END_USER_200).asXML();
+                        return XMLCreate.createResponseXML(200, "Register End-User", StringText.REGISTER_END_USER_200).asXML();
                     }
                 } else {
-                    return XMLCreate.createXML(300, "Register End-User", StringText.REGISTER_END_USER_300).asXML();
+                    return XMLCreate.createResponseXML(300, "Register End-User", StringText.REGISTER_END_USER_300).asXML();
                 }
             }
         }
-        return XMLCreate.createXML(203, "Register End-User", StringText.ERROR_203).asXML();
+        return XMLCreate.createResponseXML(203, "Register End-User", StringText.ERROR_203).asXML();
     }
 
     @POST
@@ -77,16 +79,16 @@ public class Manage {
                     String removalCode = parse.getDataFromTag("code", 0);
 
                     if (SiteUser.disableEndUser(username, removalCode)) {
-                        return XMLCreate.createXML(100, "Disable End-User", StringText.DISABLE_END_USER_100).asXML();
+                        return XMLCreate.createResponseXML(100, "Disable End-User", StringText.DISABLE_END_USER_100).asXML();
                     } else {
-                        return XMLCreate.createXML(200, "Disable End-User", StringText.DISABLE_END_USER_200).asXML();
+                        return XMLCreate.createResponseXML(200, "Disable End-User", StringText.DISABLE_END_USER_200).asXML();
                     }
                 } else {
-                    return XMLCreate.createXML(300, "Disable End-User", StringText.DISABLE_END_USER_300).asXML();
+                    return XMLCreate.createResponseXML(300, "Disable End-User", StringText.DISABLE_END_USER_300).asXML();
                 }
             }
         }
-        return XMLCreate.createXML(203, "Disable End-User", StringText.ERROR_203).asXML();
+        return XMLCreate.createResponseXML(203, "Disable End-User", StringText.ERROR_203).asXML();
     }
 
 }
