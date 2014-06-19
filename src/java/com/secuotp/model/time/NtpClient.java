@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.model.time;
+package com.secuotp.model.time;
 
 /**
  *
@@ -15,7 +15,10 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * NtpClient - an NTP client for Java. This program connects to an NTP server
@@ -97,6 +100,32 @@ public class NtpClient {
         System.out.println("Local clock offset: "
                 + new DecimalFormat("0.00").format(localClockOffset * 1000) + " ms");
 
+    }
+
+    public static void main(String[] args) throws UnknownHostException, IOException {
+        NtpMessage message = NtpClient.GetNTPTime();
+        
+        double destinationTimestamp
+                = (System.currentTimeMillis() / 1000.0) + 2208988800.0;
+
+        double roundTripDelay = (destinationTimestamp - message.originateTimestamp)
+                - (message.transmitTimestamp - message.receiveTimestamp);
+
+        double localClockOffset
+                = ((message.receiveTimestamp - message.originateTimestamp)
+                + (message.transmitTimestamp - destinationTimestamp)) / 2;
+        
+        System.out.println("Dest. timestamp:     "
+                + NtpMessage.timestampToString(destinationTimestamp));
+
+        System.out.println("Round-trip delay: "
+                + new DecimalFormat("0.00").format(roundTripDelay * 1000) + " ms");
+
+        System.out.println("Local clock offset: "
+                + new DecimalFormat("0.00").format(localClockOffset * 1000) + " ms");
+        //DateFormat df = new SimpleDateFormat(SERVER_NAME);
+        
+            
     }
 
     /**

@@ -23,23 +23,23 @@ import org.xml.sax.SAXException;
  *
  * @author Zenology
  */
-public class XMLParse {
+public class XMLParser {
 
     private Document doc;
     private NodeList list;
     private Element e;
 
-    public XMLParse(String xml) {
+    public XMLParser(String xml) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             doc = builder.parse(new InputSource(new StringReader(xml)));
         } catch (ParserConfigurationException ex) {
-            Logger.getLogger(XMLParse.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XMLParser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SAXException ex) {
-            Logger.getLogger(XMLParse.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XMLParser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(XMLParse.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XMLParser.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

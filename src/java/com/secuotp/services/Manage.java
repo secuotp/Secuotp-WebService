@@ -9,7 +9,7 @@ import com.secuotp.model.Site;
 import com.secuotp.model.SiteUser;
 import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
-import com.secuotp.model.xml.XMLParse;
+import com.secuotp.model.xml.XMLParser;
 import com.secuotp.model.xml.XMLValidate;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -39,7 +39,7 @@ public class Manage {
     public String registerEndUser(@FormParam("request") String xml) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NoSuchAlgorithmException {
         XMLValidate val = new XMLValidate(new URL(StringText.REGISTER_END_USER_XSD));
         if (val.validate(xml, "M-01")) {
-            XMLParse parse = new XMLParse(xml);
+            XMLParser parse = new XMLParser(xml);
             String domain = parse.getDataFromTag("domain", 0);
             String serial = parse.getDataFromTag("serial", 0);
 
@@ -65,7 +65,7 @@ public class Manage {
     public String disableEndUser(@FormParam("request") String xml) throws MalformedURLException {
         XMLValidate val = new XMLValidate(new URL(StringText.DISABLE_END_USER_XSD));
         if (val.validate(xml, "M-02")) {
-            XMLParse parse = new XMLParse(xml);
+            XMLParser parse = new XMLParser(xml);
             String domain = parse.getDataFromTag("domain", 0);
             String serial = parse.getDataFromTag("serial", 0);
             if (Site.authenService(domain, serial)) {
@@ -86,7 +86,7 @@ public class Manage {
     }
 
     private SiteUser createSiteUserXML(String xml) {
-        XMLParse parse = new XMLParse(xml);
+        XMLParser parse = new XMLParser(xml);
         SiteUser siteUser = new SiteUser();
 
         siteUser.setUsername(parse.getDataFromTag("username", 0));

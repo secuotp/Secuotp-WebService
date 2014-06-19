@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.model.time;
+package com.secuotp.model.time;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;

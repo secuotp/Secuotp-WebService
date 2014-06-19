@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,7 +18,7 @@ import java.util.logging.Logger;
  *
  * @author zenology
  */
-public class Site {
+public class Site extends SiteConfig{
 
     private String siteId;
     private String siteName;
@@ -91,5 +92,35 @@ public class Site {
             Logger.getLogger(Site.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
+    }
+    
+    public static Site getSite(String domain){
+        try {
+            Connection con = ConnectionAgent.getInstance();
+            String sql = "SELECT * FROM secuotp.site_config_full WHERE domain = \'" + domain + "\'";
+            Statement st = con.createStatement();
+            
+            ResultSet rs = st.executeQuery(sql);
+            if(rs.next()){
+                Site s = new Site();
+                s.setSiteId("" + rs.getInt(1));
+                s.setSiteName(rs.getString(2));
+                s.setDomain(domain);
+                s.setSerialNumber(rs.getString(4));
+                s.setDescirption(rs.getString(5));
+                s.setImgPath(rs.getString(6));
+                s.setSiteConfigId("" + rs.getInt(7));
+                s.setPatternName(rs.getString(8));
+                s.setLength(rs.getInt(9));
+                s.setDisable(rs.getInt(10) > 0);
+                
+                return s;
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Site.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Site.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 }

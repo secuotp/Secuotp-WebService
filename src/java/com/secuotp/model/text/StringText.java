@@ -29,6 +29,8 @@ public class StringText {
     //==================================   GENERATE OTP   =========================================
     public static final String GENERATE_OTP_XSD = "http://secuotp.sit.kmutt.ac.th/FilePost/File/Generate%20One-Time%20Password.xsd";
     public static final String GENERATE_OTP_300 = "Failed to Generate One-Time Password: Not Allowed to Generate One-Time Password";
-    public static final String GENERATE_OTP_301 = "Failed to Generate One-Time Password: End-User Not Found";
+    public static final String GENERATE_OTP_301_1 = "Failed to Generate One-Time Password: End-User Not Found";
+    public static final String GENERATE_OTP_301_2 = "Failed to Generate One-Time Password: Site Not Found";
+    public static final String GENERATE_OTP_302 = "Failed to Generate One-Time Password: End-User One-Time Password Mode Mismatch";
 
 }

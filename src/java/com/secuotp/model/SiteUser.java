@@ -69,7 +69,7 @@ public class SiteUser extends People {
         this.removalCode = removalCode;
     }
 
-    public boolean isMobileMode() {
+    public boolean getMobileMode() {
         return mobileMode;
     }
 
