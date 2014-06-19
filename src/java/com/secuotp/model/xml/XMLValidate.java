@@ -16,6 +16,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.validation.SchemaFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -26,17 +28,17 @@ import org.xml.sax.SAXParseException;
  * @author zenology
  */
 public class XMLValidate {
-    
+
     private XMLCheck check;
     private URL schemaFile;
-    
-    public XMLValidate(URL schemaFile){
+
+    public XMLValidate(URL schemaFile) {
         check = new XMLCheck();
         this.schemaFile = schemaFile;
     }
-    
-    public boolean validate(String xml) {
-        try {            
+
+    public boolean validate(String xml, String serviceID) {
+        try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setValidating(false);
             factory.setNamespaceAware(true);
@@ -50,8 +52,13 @@ public class XMLValidate {
 
             builder.setErrorHandler(new SimpleErrorHandler(check));
             Document document = builder.parse(new InputSource(new StringReader(xml)));
-            
-            return check.isPass();
+            if (check.isPass()) {
+                NodeList list = document.getElementsByTagName("service");
+                Element e = (Element) list.item(0);
+                String attr = e.getAttribute("sid");
+                return attr.equals(serviceID);
+            }
+            return false;
         } catch (ParserConfigurationException ex) {
             Logger.getLogger(XMLValidate.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SAXException ex) {
@@ -64,11 +71,13 @@ public class XMLValidate {
 }
 
 class SimpleErrorHandler implements ErrorHandler {
+
     private XMLCheck check;
+
     public SimpleErrorHandler(XMLCheck check) {
         this.check = check;
     }
-    
+
     @Override
     public void warning(SAXParseException e) throws SAXException {
         System.out.println("A");

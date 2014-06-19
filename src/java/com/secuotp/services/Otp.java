@@ -5,16 +5,11 @@
  */
 package com.secuotp.services;
 
-import com.secuotp.model.Site;
 import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParse;
 import com.secuotp.model.xml.XMLValidate;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -40,7 +35,7 @@ public class Otp {
         
         XMLValidate xmlVal = new XMLValidate(new URL(StringText.GENERATE_OTP_XSD));
         
-        if(xmlVal.validate(xml)){
+        if(xmlVal.validate(xml, "G-01")){
             return XMLCreate.createResponseXML(100, "Generate One-Time Password", "Passed").asXML();
         }
         
