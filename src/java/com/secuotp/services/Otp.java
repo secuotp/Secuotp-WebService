@@ -5,6 +5,8 @@
  */
 package com.secuotp.services;
 
+import com.secuotp.model.Site;
+import com.secuotp.model.SiteUser;
 import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParse;
@@ -30,13 +32,24 @@ public class Otp {
     @Path("/generate")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String generate(@FormParam("request") String xml) throws SAXException, IOException {
-        XMLParse parse = new XMLParse(xml);
-        
+    public String generate(@FormParam("request") String xml) throws SAXException, IOException {        
         XMLValidate xmlVal = new XMLValidate(new URL(StringText.GENERATE_OTP_XSD));
-        
         if(xmlVal.validate(xml, "G-01")){
-            return XMLCreate.createResponseXML(100, "Generate One-Time Password", "Passed").asXML();
+            XMLParse parse = new XMLParse(xml);
+            
+            String domain = parse.getDataFromTag("domain", 0);
+            String serial = parse.getDataFromTag("serial", 0);
+            
+            if(Site.authenService(domain, serial)){
+                SiteUser user = SiteUser.getSiteUser(parse.getDataFromTag("username", 0), domain);
+                if(user == null){
+                    return XMLCreate.createResponseXML(301, "Generate One-Time Password", StringText.GENERATE_OTP_301).asXML();
+                }
+                
+                
+            }else{
+                return XMLCreate.createResponseXML(300, "Generate One-Time Password", StringText.GENERATE_OTP_300).asXML();
+            }
         }
         
         return XMLCreate.createResponseXML(203, "Generate One-Time Password", StringText.ERROR_203).asXML();

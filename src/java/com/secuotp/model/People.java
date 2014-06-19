@@ -11,19 +11,10 @@ package com.secuotp.model;
  * @author zenology
  */
 public abstract class People {
-    private String peopleId;
     private String username;
     private String email;
     private String firstname;
     private String lastname;
-
-    public String getPeopleId() {
-        return peopleId;
-    }
-
-    public void setPeopleId(String peopleId) {
-        this.peopleId = peopleId;
-    }
 
     public String getUsername() {
         return username;

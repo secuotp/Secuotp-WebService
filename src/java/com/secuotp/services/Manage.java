@@ -11,7 +11,6 @@ import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParse;
 import com.secuotp.model.xml.XMLValidate;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,11 +37,9 @@ public class Manage {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public String registerEndUser(@FormParam("request") String xml) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NoSuchAlgorithmException {
-        XMLParse parse = new XMLParse(xml);
-
         XMLValidate val = new XMLValidate(new URL(StringText.REGISTER_END_USER_XSD));
-
         if (val.validate(xml, "M-01")) {
+            XMLParse parse = new XMLParse(xml);
             String domain = parse.getDataFromTag("domain", 0);
             String serial = parse.getDataFromTag("serial", 0);
 
@@ -66,10 +63,9 @@ public class Manage {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public String disableEndUser(@FormParam("request") String xml) throws MalformedURLException {
-        XMLParse parse = new XMLParse(xml);
-
         XMLValidate val = new XMLValidate(new URL(StringText.DISABLE_END_USER_XSD));
         if (val.validate(xml, "M-02")) {
+            XMLParse parse = new XMLParse(xml);
             String domain = parse.getDataFromTag("domain", 0);
             String serial = parse.getDataFromTag("serial", 0);
             if (Site.authenService(domain, serial)) {

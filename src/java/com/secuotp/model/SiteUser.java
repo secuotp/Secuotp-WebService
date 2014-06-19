@@ -77,6 +77,38 @@ public class SiteUser extends People {
         this.mobileMode = mobileMode;
 
     }
+    
+    public static SiteUser getSiteUser(String username, String domain){
+        try {
+            Connection con = ConnectionAgent.getInstance();
+            String sql = "SELECT * FROM site_user WHERE username = ? AND site_id = (SELECT site_id FROM site WHERE domain = ? LIMIT 0, 1)";
+            PreparedStatement ps = con.prepareCall(sql);
+            ps.setString(1, username);
+            ps.setString(2, domain);
+            
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                SiteUser user = new SiteUser();
+                user.setSiteUserId("" + rs.getInt(1));
+                user.setSiteId("" + rs.getInt(2));
+                user.setUsername(rs.getString(3));
+                user.setEmail(rs.getString(4));
+                user.setFirstname(rs.getString(5));
+                user.setLastname(rs.getString(6));
+                user.setPhone(rs.getString(7));
+                user.setSerialNumber(rs.getString(8));
+                user.setRemovalCode(rs.getString(9));
+                user.setMobileMode(rs.getInt(10) > 0);
+                
+                return user;
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(SiteUser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(SiteUser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
 
     public static boolean addSiteUser(SiteUser user, String domainName, String serialNumber) throws ClassNotFoundException, SQLException, NoSuchAlgorithmException, UnsupportedEncodingException {
         Connection con = ConnectionAgent.getInstance();
