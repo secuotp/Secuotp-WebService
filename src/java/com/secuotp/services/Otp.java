@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -67,8 +69,9 @@ public class Otp {
                 
                 Calendar remain = Calendar.getInstance();
                 remain.setTimeInMillis(c.getTimeInMillis() + (5*1000*60));
-                
-                SOAPMessage response = SMSSender.sendSMS(user.getPhone(), site.getSiteName() + "\n Your OTP is " + totp + "\n Enter before " + remain.getTime().toString());
+                DateFormat df = new SimpleDateFormat("dd-M-yy HH:mm a");
+                String message = site.getSiteName() + "\n Your OTP: " + totp + "\nPassword expired at " + df.format(remain.getTime());
+                SOAPMessage response = SMSSender.sendSMS(user.getPhone(), message);
                 
                 return XMLCreate.createResponseXML(100, "Generate One-Time Password", StringText.GENERATE_OTP_100).asXML();
             } else {
