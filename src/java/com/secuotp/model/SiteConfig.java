@@ -15,6 +15,7 @@ public class SiteConfig {
     private String patternName;
     private int length;
     private boolean disable;
+    private String timeZone;
 
     public String getSiteConfigId() {
         return siteConfigId;
@@ -46,6 +47,14 @@ public class SiteConfig {
 
     public void setDisable(boolean disable) {
         this.disable = disable;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
     
     

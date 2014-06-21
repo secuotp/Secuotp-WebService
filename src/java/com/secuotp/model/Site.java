@@ -113,7 +113,7 @@ public class Site extends SiteConfig{
                 s.setPatternName(rs.getString(8));
                 s.setLength(rs.getInt(9));
                 s.setDisable(rs.getInt(10) > 0);
-                
+                s.setTimeZone(rs.getString(11));
                 return s;
             }
         } catch (ClassNotFoundException ex) {

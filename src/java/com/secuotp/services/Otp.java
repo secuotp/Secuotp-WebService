@@ -8,6 +8,7 @@ package com.secuotp.services;
 import com.secuotp.model.Site;
 import com.secuotp.model.SiteUser;
 import com.secuotp.model.generate.TOTP;
+import com.secuotp.model.generate.TOTPPattern;
 import com.secuotp.model.sms.SMSSender;
 import com.secuotp.model.text.StringText;
 import com.secuotp.model.time.NTPTime;
@@ -20,6 +21,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.TimeZone;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -64,11 +66,14 @@ public class Otp {
                 Calendar c = NTPTime.reformatTime(NTPTime.getNTPCalendar(), 0, 5, 0);
                 
                 String totp = TOTP.getOTP(user.getSerialNumber(), site.getSerialNumber(), c, site.getLength());
+                totp = TOTPPattern.toPattern(totp, site.getPatternName());
                 
                 Calendar remain = Calendar.getInstance();
                 remain.setTimeInMillis(c.getTimeInMillis() + (5*1000*60));
-                DateFormat df = new SimpleDateFormat("dd-M-yy HH:mm a");
-                String message = site.getSiteName() + "\n Your OTP: " + totp + "\nPassword expired at " + df.format(remain.getTime());
+                DateFormat df = new SimpleDateFormat("HH:mm zz");
+                df.setTimeZone(TimeZone.getTimeZone(site.getTimeZone()));
+                
+                String message = site.getSiteName() + "\nYour OTP: " + totp + "\nPassword expired at\n" + df.format(remain.getTime());
                 SOAPMessage response = SMSSender.sendSMS(user.getPhone(), message);
                 
                 return XMLCreate.createResponseXML(100, "Generate One-Time Password", StringText.GENERATE_OTP_100).asXML();

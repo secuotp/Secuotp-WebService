@@ -5,81 +5,129 @@
  */
 package com.secuotp.model.generate;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author zenology
  */
 public class TOTPPattern {
-
-    static char[] text = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
-    String[] textNum = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
-    static char[] hexText = {'F', '0', '1', 'D', '2', '3', 'A', '4', '5', 'E', '6', '7', 'B', '8', '9', 'C'};
-
     public static String toPattern(String totp, String pattern) {
-        char[] patternText = null;
         if (pattern.equalsIgnoreCase("Numeric")) {
             return totp;
         } else if (pattern.equalsIgnoreCase("Hexadecimal")) {
-            patternText = new char[8];
-            String hex = totp;
-            
-            if (hex.length() > 8) {
-                hex = hex.substring(0, 8);
-            } else if (hex.length() < 8) {
-                for (int i = hex.length(); i < 8; i++) {
-                    hex = "0" + hex;
-                }
-            }
-            
-            char[] hexChar = totp.toCharArray();
-            for(int i = 0; i< hex.length();i++){
-                hexChar[i] = (char) (36 + ((int)Math.ceil(Integer.parseInt("" + hexChar[i]) * 50 / 3)));
-            }
-            
-            for (int i = 0; i < hex.length(); i++) {
-                patternText[i] = hexText[Integer.parseInt(hex.substring(i, i + 1))];
-            }
-            return String.valueOf(patternText).toUpperCase();
-
+            return patternHex(totp);
         } else if (pattern.equalsIgnoreCase("Text")) {
-            patternText = new char[8];
-            String hex = totp;
-            
-            if (hex.length() > 8) {
-                hex = hex.substring(0, 8);
-            } else if (hex.length() < 8) {
-                for (int i = hex.length(); i < 8; i++) {
-                    hex = "0" + hex;
-                }
-            }
-            
-            char[] hexChar = totp.toCharArray();
-            int pointer = 0;
-           
-            for(int i = 0; i < (Integer.parseInt("" +hexChar[0]) * 50) ;i++){
-                pointer++;
-                if(pointer > text.length){
-                    pointer = 0;
-                }
-            }
-            hexChar[0] = text[pointer];
-            
-            hexChar[1] = text[((int)Math.ceil(Integer.parseInt("" +hexChar[1]) * 300 / 41))];
-            hexChar[2] = text[((int)Math.floor(Integer.parseInt("" +hexChar[2]) * 100 / 3))];
-            hexChar[3] = text[((int)Math.floor(Integer.parseInt("" +hexChar[3]) * 231 / 47))];
-            hexChar[4] = text[((int)Math.ceil(Integer.parseInt("" +hexChar[4]) * 87 / 13))];
-            hexChar[5] = text[((int)Math.ceil(Integer.parseInt("" +hexChar[5]) * 12 / ((int)Math.ceil(Integer.parseInt("" + hexChar[4])))))];
-            hexChar[6] = text[((int)Math.ceil(Integer.parseInt("" +hexChar[5]) * 70 / ((int)Math.ceil(Integer.parseInt("" + hexChar[6])))))];
-            hexChar[7] = text[((int)Math.ceil(Integer.parseInt("" +hexChar[7]) * 45 / ((int)Math.ceil(Integer.parseInt("" + hexChar[6])))))];
-            
-            return String.copyValueOf(hexChar);
+            return patternText(totp);
         } else if (pattern.equalsIgnoreCase("Text + Numeric")) {
-
+            return patternTextNum(totp);
         }
-        return String.valueOf(patternText);
+        return null;
+    }
+
+    private static String patternHex(String totp) {
+        char[] patternText = new char[8];
+        ArrayList<Character> list = getList(0);
+
+        char[] hexChar = randPattern(totp);
+
+        for (int i = 0; i < 8; i++) {
+            int pointer = Character.codePointAt(hexChar, i);
+            pointer = pointer % 16;
+            patternText[i] = list.get(pointer);
+        }
+
+        return String.valueOf(patternText).toUpperCase();
+    }
+
+    private static String patternText(String totp) {
+        char[] patternText = new char[8];
+        ArrayList<Character> list = getList(1);
+
+        char[] textChar = randPattern(totp);
+
+        for (int i = 0; i < 8; i++) {
+            int pointer = Character.codePointAt(textChar, i);
+            pointer = pointer % 26;
+            patternText[i] = list.get(pointer);
+        }
+
+        return String.valueOf(patternText).toUpperCase();
+    }
+
+    private static String patternTextNum(String totp) {
+        char[] patternText = new char[8];
+        ArrayList<Character> list = getList(2);
+
+        char[] textNumChar = randPattern(totp);
+
+        for (int i = 0; i < 8; i++) {
+            int pointer = Character.codePointAt(textNumChar, i);
+            pointer = pointer % 36;
+            patternText[i] = list.get(pointer);
+        }
+
+        return String.valueOf(patternText).toUpperCase();
+    }
+
+    private static char[] randPattern(String totp) {
+        if (totp.length() > 8) {
+            totp = totp.substring(0, 8);
+        } else if (totp.length() < 8) {
+            for (int i = totp.length(); i < 8; i++) {
+                totp = "0" + totp;
+            }
+        }
+
+        char[] list = totp.toCharArray();
+        if (totp.length() == 8) {
+            for (int i = 0; i < list.length; i++) {
+                if (i == 0) {
+                    list[i] = (char) ((int) Math.floor(Integer.parseInt("" + list[i]) * 50 / 3));
+                } else {
+                    list[i] = (char) (((int) Math.floor(Integer.parseInt("" + list[i]) * 50 / 3)) + Character.codePointAt(list, i - 1));
+                }
+            }
+        }
+
+        return list;
+
+    }
+
+    private static ArrayList<Character> getList(int mode) {
+        ArrayList<Character> list = new ArrayList<Character>();
+        if (mode == 0) {
+            for (int i = 0; i < 16; i++) {
+                String hex = Integer.toHexString(i);
+                list.add(hex.charAt(0));
+            }
+
+            return list;
+        } else if (mode == 1) {
+            for (int i = 0; i < 26; i++) {
+                int ascii = i + 65;
+                list.add((char) ascii);
+            }
+
+            return list;
+        } else if (mode == 2) {
+            int pointer = 0;
+            for (int i = 0; i < 36; i++) {
+                int ascii;
+                if (i < 26) {
+                    ascii = i + 65;        
+                }else{            
+                    ascii = pointer++ + 48;
+                }
+                list.add((char) ascii);
+            }
+
+            return list;
+        }
+        return null;
     }
 
     public static void main(String[] args) {
-        System.out.println(TOTPPattern.toPattern("4561887017", "Text"));
+        System.out.println(TOTPPattern.toPattern("585683157", "Text + Numeric"));
     }
 }
