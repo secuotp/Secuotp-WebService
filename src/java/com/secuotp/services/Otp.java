@@ -16,6 +16,7 @@ import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParser;
 import com.secuotp.model.xml.XMLValidate;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -62,19 +63,23 @@ public class Otp {
                 } else if (user.getMobileMode()) {
                     return XMLCreate.createResponseXML(302, "Generate One-Time Password", StringText.GENERATE_OTP_302).asXML();
                 }
-
+                
+                //OTP Generator
                 Calendar c = NTPTime.reformatTime(NTPTime.getNTPCalendar(), 0, 5, 0);
-                
-                String totp = TOTP.getOTP(user.getSerialNumber(), site.getSerialNumber(), c, site.getLength());
+
+                String totp = TOTP.getOTP(user.getSerialNumber(), site.getSerialNumber(), c, 8);
                 totp = TOTPPattern.toPattern(totp, site.getPatternName());
-                
+                totp = TOTPPattern.toSize(totp, site.getLength(), site.getPatternName());
+
                 Calendar remain = Calendar.getInstance();
-                remain.setTimeInMillis(c.getTimeInMillis() + (5*1000*60));
+                remain.setTimeInMillis(c.getTimeInMillis() + (5 * 1000 * 60));
                 DateFormat df = new SimpleDateFormat("HH:mm zz");
                 df.setTimeZone(TimeZone.getTimeZone(site.getTimeZone()));
+                //End of OTP Generator
                 
                 String message = site.getSiteName() + "\nYour OTP: " + totp + "\nPassword expired at\n" + df.format(remain.getTime());
                 SOAPMessage response = SMSSender.sendSMS(user.getPhone(), message);
+
                 
                 return XMLCreate.createResponseXML(100, "Generate One-Time Password", StringText.GENERATE_OTP_100).asXML();
             } else {
@@ -85,4 +90,17 @@ public class Otp {
         return XMLCreate.createResponseXML(203, "Generate One-Time Password", StringText.ERROR_203).asXML();
     }
 
+    
+    @POST
+    @Path("/authenticate")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    public String authenOTP(@FormParam("request") String xml) throws MalformedURLException{
+        XMLValidate xmlVal = new XMLValidate(new URL(StringText.AUTHENTICATE_OTP_XSD));
+        
+        if(xmlVal.validate(xml, "A-01")){
+            return XMLCreate.createResponseXML(100, "Authenticate One-Time Password", "OK").asXML();
+        }
+        return XMLCreate.createResponseXML(203, "Authenticate One-Time Password", StringText.ERROR_203).asXML();
+    }
 }

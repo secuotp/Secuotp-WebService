@@ -127,4 +127,23 @@ public class TOTPPattern {
         }
         return null;
     }
+
+    public static String toSize(String totp, int size, String mode) {
+        int length = totp.length();
+        if (size < length) {
+            totp = totp.substring(0, size);
+        } else {
+            String add = null;
+            if (mode.equals("Text")) {
+                add = "A";
+            } else {
+                add = "0";
+            }
+            
+            for(int i = length ; i < size ; i++){
+                totp = add + totp;
+            }
+        }
+        return totp;
+    }
 }

@@ -23,7 +23,7 @@ public class NTPTime {
 
     public static Calendar getNTPCalendar() {
         try {
-            String timeString = NtpMessage.timestampToString(NtpClient.GetNTPTime().receiveTimestamp);
+            String timeString = NtpMessage.timestampToString(NtpClient.GetNTPTime().transmitTimestamp);
             DateFormat df = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
             Date d = df.parse(timeString);
             Calendar c = Calendar.getInstance();

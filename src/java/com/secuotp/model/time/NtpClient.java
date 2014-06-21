@@ -48,7 +48,7 @@ import java.util.Date;
  */
 public class NtpClient {
 
-    private static final String SERVER_NAME = "2.th.pool.ntp.org";
+    private static final String SERVER_NAME = "0.europe.pool.ntp.org";
 
     public static NtpMessage GetNTPTime() throws SocketException, UnknownHostException, IOException {
 
