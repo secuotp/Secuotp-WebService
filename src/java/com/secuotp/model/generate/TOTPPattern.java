@@ -12,6 +12,7 @@ import java.util.ArrayList;
  * @author zenology
  */
 public class TOTPPattern {
+
     public static String toPattern(String totp, String pattern) {
         if (pattern.equalsIgnoreCase("Numeric")) {
             return totp;
@@ -115,8 +116,8 @@ public class TOTPPattern {
             for (int i = 0; i < 36; i++) {
                 int ascii;
                 if (i < 26) {
-                    ascii = i + 65;        
-                }else{            
+                    ascii = i + 65;
+                } else {
                     ascii = pointer++ + 48;
                 }
                 list.add((char) ascii);
@@ -125,9 +126,5 @@ public class TOTPPattern {
             return list;
         }
         return null;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(TOTPPattern.toPattern("585683157", "Text + Numeric"));
     }
 }
