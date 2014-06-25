@@ -9,6 +9,7 @@ import com.secuotp.model.connection.ConnectionAgent;
 import com.secuotp.model.generate.SerialNumber;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -81,7 +82,7 @@ public class SiteUser extends People {
     public static SiteUser getSiteUser(String username, String domain){
         try {
             Connection con = ConnectionAgent.getInstance();
-            String sql = "SELECT * FROM site_user WHERE username = ? AND site_id = (SELECT site_id FROM site WHERE domain = ? LIMIT 0, 1)";
+            String sql = "SELECT * FROM end_user WHERE username = ? AND site_id = (SELECT site_id FROM site WHERE domain = ? LIMIT 0, 1)";
             PreparedStatement ps = con.prepareCall(sql);
             ps.setString(1, username);
             ps.setString(2, domain);
@@ -120,7 +121,7 @@ public class SiteUser extends People {
             userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
         }
 
-        String sql = "INSERT INTO site_user (site_id, username, email, firstname, lastname, phone_number, serial_number, removal_code, mobile_mode) VALUES (?,?,?,?,?,?,?,?,0)";
+        String sql = "INSERT INTO end_user (site_id, username, email, firstname, lastname, phone_number, serial_number, removal_code, mobile_mode) VALUES (?,?,?,?,?,?,?,?,0)";
         PreparedStatement ps = con.prepareCall(sql);
         ps.setInt(1, Integer.parseInt(siteId));
         ps.setString(2, user.getUsername());
@@ -132,6 +133,10 @@ public class SiteUser extends People {
         ps.setString(8, removalCode);
 
         int row = ps.executeUpdate();
+        
+        sql = "CALL ";
+        CallableStatement call = con.prepareCall(sql);
+        
         return row > 0;
 
     }
@@ -162,7 +167,7 @@ public class SiteUser extends People {
     }
 
     private static boolean isNotDuplicate(String serialNumber) throws SQLException, ClassNotFoundException {
-        String sql = "SELECT COUNT(*) FROM site_user WHERE serial_number = ?";
+        String sql = "SELECT COUNT(*) FROM end_user WHERE serial_number = ?";
         Connection con = ConnectionAgent.getInstance();
         PreparedStatement ps = con.prepareCall(sql);
         ps.setString(1, serialNumber);
@@ -176,7 +181,7 @@ public class SiteUser extends People {
     public static boolean disableEndUser(String username, String removalCode) {
         try {
             Connection con = ConnectionAgent.getInstance();
-            String sql = "DELETE FROM site_user WHERE username = ? AND removal_code = ?";
+            String sql = "DELETE FROM end_user WHERE username = ? AND removal_code = ?";
             PreparedStatement ps = con.prepareCall(sql);
             ps.setString(1, username);
             ps.setString(2, removalCode);
