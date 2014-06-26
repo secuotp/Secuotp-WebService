@@ -7,22 +7,20 @@ package com.secuotp.services;
 
 import com.secuotp.model.Site;
 import com.secuotp.model.SiteUser;
-import com.secuotp.model.generate.TOTP;
+import com.secuotp.model.connection.ConnectionAgent;
 import com.secuotp.model.generate.TOTPPattern;
 import com.secuotp.model.sms.SMSSender;
 import com.secuotp.model.text.StringText;
-import com.secuotp.model.time.NTPTime;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParser;
 import com.secuotp.model.xml.XMLValidate;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DateFormat;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.TimeZone;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -44,7 +42,7 @@ public class Otp {
     @Path("/generate")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String generate(@FormParam("request") String xml) throws SAXException, IOException, ParseException, SOAPException {
+    public String generate(@FormParam("request") String xml) throws SAXException, IOException, ParseException, SOAPException, SQLException, ClassNotFoundException {
         XMLValidate xmlVal = new XMLValidate(new URL(StringText.GENERATE_OTP_XSD));
 
         if (xmlVal.validate(xml, "G-01")) {
@@ -65,23 +63,24 @@ public class Otp {
                 }
                 
                 //OTP Generator
-                Calendar c = NTPTime.reformatTime(NTPTime.getNTPCalendar(), 0, 5, 0);
-
-                String totp = TOTP.getOTP(user.getSerialNumber(), site.getSerialNumber(), c, 8);
-                totp = TOTPPattern.toPattern(totp, site.getPatternName());
-                totp = TOTPPattern.toSize(totp, site.getLength(), site.getPatternName());
-
-                Calendar remain = Calendar.getInstance();
-                remain.setTimeInMillis(c.getTimeInMillis() + (5 * 1000 * 60));
-                DateFormat df = new SimpleDateFormat("HH:mm zz");
-                df.setTimeZone(TimeZone.getTimeZone(site.getTimeZone()));
+                String[] totpAndRemaining = TOTPPattern.generateActualTOTP
+                    (5, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
                 //End of OTP Generator
                 
-                String message = site.getSiteName() + "\nYour OTP: " + totp + "\nPassword expired at\n" + df.format(remain.getTime());
-                SOAPMessage response = SMSSender.sendSMS(user.getPhone(), message);
-
+                String message = site.getSiteName() + "\nYour OTP: " + totpAndRemaining[0] + "\nPassword expired at\n" + totpAndRemaining[1];
+                String response = SMSSender.sendSMS(user.getPhone(), message);
                 
-                return XMLCreate.createResponseXML(100, "Generate One-Time Password", StringText.GENERATE_OTP_100).asXML();
+                if(response != null){
+                    Connection con = ConnectionAgent.getInstance();
+                    CallableStatement cst = con.prepareCall("CALL add_site_sms_log(?)");
+                    cst.setInt(1, Integer.parseInt(site.getSiteId()));
+                    cst.execute();
+                    
+                    return XMLCreate.createResponseXML(100, "Generate One-Time Password", StringText.GENERATE_OTP_100).asXML() + response;
+                }else{
+                    return XMLCreate.createResponseXML(401, "Generate One-Time Password", StringText.GENERATE_OTP_401).asXML();
+                }
+
             } else {
                 return XMLCreate.createResponseXML(300, "Generate One-Time Password", StringText.GENERATE_OTP_300).asXML();
             }

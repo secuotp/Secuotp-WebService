@@ -33,6 +33,7 @@ public class StringText {
     public static final String GENERATE_OTP_301_1 = "Failed to Generate One-Time Password: End-User Not Found";
     public static final String GENERATE_OTP_301_2 = "Failed to Generate One-Time Password: Site Not Found";
     public static final String GENERATE_OTP_302 = "Failed to Generate One-Time Password: End-User One-Time Password Mode Mismatch";
+    public static final String GENERATE_OTP_401 = "Failed to Generate One-Time Password: Can't Send SMS to End-User";
 
     
     public static final String AUTHENTICATE_OTP_XSD = "http://secuotp.sit.kmutt.ac.th/FilePost/File/Authenticate%20One-Time%20Password.xsd";

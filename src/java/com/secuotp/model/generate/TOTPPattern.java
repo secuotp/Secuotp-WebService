@@ -5,7 +5,12 @@
  */
 package com.secuotp.model.generate;
 
+import com.secuotp.model.time.NTPTime;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  *
@@ -139,11 +144,29 @@ public class TOTPPattern {
             } else {
                 add = "0";
             }
-            
-            for(int i = length ; i < size ; i++){
+
+            for (int i = length; i < size; i++) {
                 totp = add + totp;
             }
         }
         return totp;
+    }
+
+    public static String[] generateActualTOTP(int delayMin, String userSerial, String siteStrial, String pattern, int length, String timeZone) {
+        Calendar c = NTPTime.reformatTime(NTPTime.getNTPCalendar(), 0, delayMin, 0);
+
+        String totp = TOTP.getOTP(userSerial, siteStrial, c, 8);
+        totp = TOTPPattern.toPattern(totp, pattern);
+        totp = TOTPPattern.toSize(totp, length, pattern);
+
+        Calendar remain = Calendar.getInstance();
+        remain.setTimeInMillis(c.getTimeInMillis() + (5 * 1000 * 60));
+        DateFormat df = new SimpleDateFormat("HH:mm zz");
+        df.setTimeZone(TimeZone.getTimeZone(timeZone));
+        
+        String[] returnString = new String[2];
+        returnString[0] = totp;
+        returnString[1] = df.format(remain.getTime());
+        return returnString;
     }
 }

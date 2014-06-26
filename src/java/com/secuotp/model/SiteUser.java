@@ -134,9 +134,6 @@ public class SiteUser extends People {
 
         int row = ps.executeUpdate();
         
-        sql = "CALL ";
-        CallableStatement call = con.prepareCall(sql);
-        
         return row > 0;
 
     }

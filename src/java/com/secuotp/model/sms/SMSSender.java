@@ -3,9 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.secuotp.model.sms;
 
+import com.secuotp.model.xml.XMLCreate;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.Name;
 import javax.xml.soap.SOAPBody;
@@ -23,39 +25,61 @@ import javax.xml.soap.SOAPPart;
  * @author zenology
  */
 public class SMSSender {
+
     private static final String KEY = "dnLjIPco1OCeOfnGFjI5dgLj8vvrhW";
-    
-    public static SOAPMessage sendSMS(String tel, String msg) throws SOAPException{
-        SOAPConnectionFactory myFct = SOAPConnectionFactory.newInstance();
-        SOAPConnection myCon = myFct.createConnection();
 
-        MessageFactory myMsgFct = MessageFactory.newInstance();
-        SOAPMessage message = myMsgFct.createMessage();
+    public static String sendSMS(String tel, String msg) throws IOException {
+        SOAPMessage reply = null;
+        try {
+            SOAPConnectionFactory myFct = SOAPConnectionFactory.newInstance();
+            SOAPConnection myCon = myFct.createConnection();
 
-        SOAPPart mySPart = message.getSOAPPart();
-        SOAPEnvelope myEnvp = mySPart.getEnvelope();
+            MessageFactory myMsgFct = MessageFactory.newInstance();
+            SOAPMessage message = myMsgFct.createMessage();
+
+            SOAPPart mySPart = message.getSOAPPart();
+            SOAPEnvelope myEnvp = mySPart.getEnvelope();
+
+            SOAPBody body = myEnvp.getBody();
+
+            Name myContent = myEnvp.createName("SendSMS", null, "http://www.kmutt.ac.th/");
+            SOAPBodyElement mySymbol = body.addBodyElement(myContent);
+
+            Name keyName = myEnvp.createName("key");
+            SOAPElement keyElement = mySymbol.addChildElement(keyName);
+            keyElement.addTextNode(KEY);
+
+            Name mobileName = myEnvp.createName("mobileNumber");
+            SOAPElement mobileElement = mySymbol.addChildElement(mobileName);
+            mobileElement.addTextNode(tel);
+
+            Name textName = myEnvp.createName("textMessage");
+            SOAPElement textElement = mySymbol.addChildElement(textName);
+            textElement.addTextNode(msg);
+
+            message.saveChanges();
+
+            reply = myCon.call(message, "http://cronos.kmutt.ac.th/smswebservice/send.asmx");
+            myCon.close();
+            return readMessage(reply);
+        } catch (SOAPException e) {
+            return null;
+        }
         
-        SOAPBody body = myEnvp.getBody();
-        
-        Name myContent = myEnvp.createName("SendSMS", null, "http://www.kmutt.ac.th/");
-        SOAPBodyElement mySymbol = body.addBodyElement(myContent);
-        
-        Name keyName = myEnvp.createName("key");
-        SOAPElement keyElement = mySymbol.addChildElement(keyName);
-        keyElement.addTextNode(KEY);
-        
-        Name mobileName = myEnvp.createName("mobileNumber");
-        SOAPElement mobileElement = mySymbol.addChildElement(mobileName);
-        mobileElement.addTextNode(tel);
-        
-        Name textName = myEnvp.createName("textMessage");
-        SOAPElement textElement = mySymbol.addChildElement(textName);
-        textElement.addTextNode(msg);
-        
-        message.saveChanges();
-        
-        SOAPMessage reply = myCon.call(message, "http://cronos.kmutt.ac.th/smswebservice/send.asmx");
-        myCon.close();
-        return reply;
+    }
+
+    public static String readMessage(SOAPMessage message) throws SOAPException, IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        message.writeTo(os);
+
+        final String encoding = (String) message.getProperty(SOAPMessage.CHARACTER_SET_ENCODING);
+        String responseXml;
+        if (encoding == null) {
+            responseXml = new String(os.toByteArray());
+        } else {
+            responseXml = new String(os.toByteArray(), encoding);
+        }
+
+        return responseXml;
     }
 }
