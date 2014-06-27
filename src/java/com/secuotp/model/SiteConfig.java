@@ -14,7 +14,7 @@ public class SiteConfig {
     private String siteConfigId;
     private String patternName;
     private int length;
-    private boolean disable;
+    private boolean otpDisable;
     private String timeZone;
 
     public String getSiteConfigId() {
@@ -41,12 +41,12 @@ public class SiteConfig {
         this.length = length;
     }
 
-    public boolean isDisable() {
-        return disable;
+    public boolean isOtpDisable() {
+        return otpDisable;
     }
 
-    public void setDisable(boolean disable) {
-        this.disable = disable;
+    public void setOtpDisable(boolean otpDisable) {
+        this.otpDisable = otpDisable;
     }
 
     public String getTimeZone() {

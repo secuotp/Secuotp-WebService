@@ -43,9 +43,8 @@ public class Manage {
             String domain = parse.getDataFromTag("domain", 0);
             String serial = parse.getDataFromTag("serial", 0);
 
-            if (Site.authenService(domain, serial)) {
+            if (Site.authenService(domain, serial) && !Site.checkDisabled(domain)) {
                 SiteUser user = createSiteUserXML(xml);
-
                 if (SiteUser.addSiteUser(user, domain, serial)) {
                     return XMLCreate.createResponseXML(100, "Register End-User", StringText.REGISTER_END_USER_100).asXML();
                 } else {
@@ -62,13 +61,13 @@ public class Manage {
     @Path("/disable/end-user")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String disableEndUser(@FormParam("request") String xml) throws MalformedURLException {
+    public String disableEndUser(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException {
         XMLValidate val = new XMLValidate(new URL(StringText.DISABLE_END_USER_XSD));
         if (val.validate(xml, "M-02")) {
             XMLParser parse = new XMLParser(xml);
             String domain = parse.getDataFromTag("domain", 0);
             String serial = parse.getDataFromTag("serial", 0);
-            if (Site.authenService(domain, serial)) {
+            if (Site.authenService(domain, serial) && !Site.checkDisabled(domain)) {
                 String username = parse.getDataFromTag("username", 0);
                 String removalCode = parse.getDataFromTag("code", 0);
 

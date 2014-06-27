@@ -28,7 +28,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
 import org.xml.sax.SAXException;
 
 /**
@@ -50,7 +49,7 @@ public class Otp {
             String domain = parse.getDataFromTag("domain", 0);
             String serial = parse.getDataFromTag("serial", 0);
 
-            if (Site.authenService(domain, serial)) {
+            if (Site.authenService(domain, serial) && !Site.checkDisabled(domain)) {
                 Site site = Site.getSite(domain);
                 SiteUser user = SiteUser.getSiteUser(parse.getDataFromTag("username", 0), domain);
 
@@ -61,23 +60,22 @@ public class Otp {
                 } else if (user.getMobileMode()) {
                     return XMLCreate.createResponseXML(302, "Generate One-Time Password", StringText.GENERATE_OTP_302).asXML();
                 }
-                
+
                 //OTP Generator
-                String[] totpAndRemaining = TOTPPattern.generateActualTOTP
-                    (5, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
+                String[] totpAndRemaining = TOTPPattern.generateActualTOTP(5, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
                 //End of OTP Generator
-                
+
                 String message = site.getSiteName() + "\nYour OTP: " + totpAndRemaining[0] + "\nPassword expired at\n" + totpAndRemaining[1];
                 String response = SMSSender.sendSMS(user.getPhone(), message);
-                
-                if(response != null){
+
+                if (response != null) {
                     Connection con = ConnectionAgent.getInstance();
                     CallableStatement cst = con.prepareCall("CALL add_site_sms_log(?)");
                     cst.setInt(1, Integer.parseInt(site.getSiteId()));
                     cst.execute();
-                    
+
                     return XMLCreate.createResponseXML(100, "Generate One-Time Password", StringText.GENERATE_OTP_100).asXML() + response;
-                }else{
+                } else {
                     return XMLCreate.createResponseXML(401, "Generate One-Time Password", StringText.GENERATE_OTP_401).asXML();
                 }
 
@@ -89,17 +87,64 @@ public class Otp {
         return XMLCreate.createResponseXML(203, "Generate One-Time Password", StringText.ERROR_203).asXML();
     }
 
-    
     @POST
     @Path("/authenticate")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String authenOTP(@FormParam("request") String xml) throws MalformedURLException{
+    public String authenOTP(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException {
         XMLValidate xmlVal = new XMLValidate(new URL(StringText.AUTHENTICATE_OTP_XSD));
-        
-        if(xmlVal.validate(xml, "A-01")){
-            return XMLCreate.createResponseXML(100, "Authenticate One-Time Password", "OK").asXML();
+
+        if (xmlVal.validate(xml, "A-01")) {
+            XMLParser parse = new XMLParser(xml);
+            String domain = parse.getDataFromTag("domain", 0);
+            String serial = parse.getDataFromTag("serial", 0);
+
+            if (Site.authenService(domain, serial) && !Site.checkDisabled(domain)) {
+                Site site = Site.getSite(domain);
+                SiteUser user = SiteUser.getSiteUser(parse.getDataFromTag("username", 0), domain);
+
+                if (user == null) {
+                    return XMLCreate.createResponseXML(301, "Generate One-Time Password", StringText.GENERATE_OTP_301_1).asXML();
+                } else if (site == null) {
+                    return XMLCreate.createResponseXML(301, "Generate One-Time Password", StringText.GENERATE_OTP_301_2).asXML();
+                }
+
+                String[] totpAndRemaining;
+                if (!user.getMobileMode()) {
+                    //OTP Generator
+                    totpAndRemaining = TOTPPattern.generateActualTOTP(5, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
+
+                    String password = parse.getDataFromTag("password", 0);
+                    if (password.equalsIgnoreCase(totpAndRemaining[0])) {
+                        executeProcedure(Integer.parseInt(site.getSiteId()));
+                        
+                        return XMLCreate.createResponseXML(100, "Authenticate One-Time Password", StringText.AUTHENTICATE_OTP_100).asXML();
+                    } else {
+                        return XMLCreate.createResponseXML(303, "Authenticate One-Time Password", StringText.AUTHENTICATE_OTP_303).asXML();
+                    }
+                } else {
+                    //Wait for iOS Swift Lang Complete to Debug This Section;
+                    totpAndRemaining = TOTPPattern.generateActualTOTP(1, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
+
+                    String password = parse.getDataFromTag("password", 0);
+                    if (password.equalsIgnoreCase(totpAndRemaining[0])) {
+                        executeProcedure(Integer.parseInt(site.getSiteId()));
+                        
+                        return XMLCreate.createResponseXML(100, "Authenticate One-Time Password", StringText.AUTHENTICATE_OTP_100).asXML();
+                    } else {
+                        return XMLCreate.createResponseXML(303, "Authenticate One-Time Password", StringText.AUTHENTICATE_OTP_303).asXML();
+                    }
+                }
+            }
         }
         return XMLCreate.createResponseXML(203, "Authenticate One-Time Password", StringText.ERROR_203).asXML();
+    }
+
+    private static void executeProcedure(int siteId) throws ClassNotFoundException, SQLException {
+        String sql = "CALL add_site_request_log(?)";
+        Connection con = ConnectionAgent.getInstance();
+        CallableStatement cs = con.prepareCall(sql);
+        cs.setInt(1, siteId);
+        cs.execute();
     }
 }

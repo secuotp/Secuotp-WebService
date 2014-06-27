@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  *
  * @author zenology
  */
-public class Site extends SiteConfig{
+public class Site extends SiteConfig {
 
     private String siteId;
     private String siteName;
@@ -26,6 +26,15 @@ public class Site extends SiteConfig{
     private String serialNumber;
     private String descirption;
     private String imgPath;
+    private boolean siteDisabled;
+
+    public boolean isSiteDisabled() {
+        return siteDisabled;
+    }
+
+    public void setSiteDisabled(boolean siteDisabled) {
+        this.siteDisabled = siteDisabled;
+    }
 
     public String getSiteId() {
         return siteId;
@@ -83,7 +92,7 @@ public class Site extends SiteConfig{
             ps.setString(1, domain);
             ps.setString(2, serial);
             ResultSet rs = ps.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
                 return rs.getInt(1) > 0;
             }
         } catch (ClassNotFoundException ex) {
@@ -93,15 +102,15 @@ public class Site extends SiteConfig{
         }
         return false;
     }
-    
-    public static Site getSite(String domain){
+
+    public static Site getSite(String domain) {
         try {
             Connection con = ConnectionAgent.getInstance();
             String sql = "SELECT * FROM secuotp.site_config_full WHERE domain = \'" + domain + "\'";
             Statement st = con.createStatement();
-            
+
             ResultSet rs = st.executeQuery(sql);
-            if(rs.next()){
+            if (rs.next()) {
                 Site s = new Site();
                 s.setSiteId("" + rs.getInt(1));
                 s.setSiteName(rs.getString(2));
@@ -109,11 +118,12 @@ public class Site extends SiteConfig{
                 s.setSerialNumber(rs.getString(4));
                 s.setDescirption(rs.getString(5));
                 s.setImgPath(rs.getString(6));
-                s.setSiteConfigId("" + rs.getInt(7));
-                s.setPatternName(rs.getString(8));
-                s.setLength(rs.getInt(9));
-                s.setDisable(rs.getInt(10) > 0);
-                s.setTimeZone(rs.getString(11));
+                s.setSiteDisabled(rs.getInt(7) > 0);
+                s.setSiteConfigId("" + rs.getInt(8));
+                s.setPatternName(rs.getString(9));
+                s.setLength(rs.getInt(10));
+                s.setOtpDisable(rs.getInt(11) > 0);
+                s.setTimeZone(rs.getString(12));
                 return s;
             }
         } catch (ClassNotFoundException ex) {
@@ -122,5 +132,17 @@ public class Site extends SiteConfig{
             Logger.getLogger(Site.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+
+    public static boolean checkDisabled(String domain) throws ClassNotFoundException, SQLException {
+        String sql = "SELECT disabled FROM site WHERE domain = ?";
+        Connection con = ConnectionAgent.getInstance();
+        PreparedStatement ps = con.prepareCall(sql);
+        ps.setString(1, domain);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1) > 0;
+        }
+        return false;
     }
 }
