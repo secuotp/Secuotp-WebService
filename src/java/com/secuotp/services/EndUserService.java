@@ -62,7 +62,7 @@ public class EndUserService {
                 
                 return XMLCreate.createResponseXMLWithData("Get End-User Data", StringText.GET_END_USER_DATA_101, param).asXML();
             }
-            return "<a>Passed</a>";
+            return XMLCreate.createResponseXML(300, "Get End-User Data", StringText.GET_END_USER_DATA_300).asXML();
         }
         return XMLCreate.createResponseXML(203, "Get End-User Data", StringText.ERROR_203).asXML();
     }

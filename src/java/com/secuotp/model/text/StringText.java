@@ -45,5 +45,6 @@ public class StringText {
     //==================================   GET END-USER DATA   =========================================
     public static final String GET_END_USER_DATA_XSD = "http://secuotp.sit.kmutt.ac.th/FilePost/File/Get%20End-User%20Data.xsd";
     public static final String GET_END_USER_DATA_101 = "End-User Data";
+    public static final String GET_END_USER_DATA_300 = "Failed to Get End-User: Not Allowed to Get End-User or This site maybe Disabled";
     public static final String GET_END_USER_DATA_301 = "Failed to Get End-User: End-User Not Found";
 }
