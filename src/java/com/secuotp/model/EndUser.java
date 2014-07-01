@@ -9,6 +9,7 @@ import com.secuotp.model.connection.ConnectionAgent;
 import com.secuotp.model.generate.SerialNumber;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -77,17 +78,17 @@ public class EndUser extends People {
         this.mobileMode = mobileMode;
 
     }
-    
-    public static EndUser getEndUser(String username, String domain){
+
+    public static EndUser getEndUser(String username, String domain) {
         try {
             Connection con = ConnectionAgent.getInstance();
             String sql = "SELECT * FROM end_user WHERE username = ? AND site_id = (SELECT site_id FROM site WHERE domain = ? LIMIT 0, 1)";
             PreparedStatement ps = con.prepareCall(sql);
             ps.setString(1, username);
             ps.setString(2, domain);
-            
+
             ResultSet rs = ps.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
                 EndUser user = new EndUser();
                 user.setSiteUserId("" + rs.getInt(1));
                 user.setSiteId("" + rs.getInt(2));
@@ -99,7 +100,7 @@ public class EndUser extends People {
                 user.setSerialNumber(rs.getString(8));
                 user.setRemovalCode(rs.getString(9));
                 user.setMobileMode(rs.getInt(10) > 0);
-                
+
                 return user;
             }
         } catch (ClassNotFoundException | SQLException ex) {
@@ -130,7 +131,7 @@ public class EndUser extends People {
         ps.setString(8, removalCode);
 
         int row = ps.executeUpdate();
-        
+
         return row > 0;
 
     }
@@ -179,12 +180,25 @@ public class EndUser extends People {
             PreparedStatement ps = con.prepareCall(sql);
             ps.setString(1, username);
             ps.setString(2, removalCode);
-            
+
             int row = ps.executeUpdate();
             return row > 0;
         } catch (SQLException | ClassNotFoundException ex) {
             Logger.getLogger(EndUser.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
+    }
+
+    public static void updateEndUser(String username, int siteId, String[] param) throws ClassNotFoundException, SQLException {
+        Connection con = ConnectionAgent.getInstance();
+        CallableStatement cs = con.prepareCall("CALL update_end_user(?,?,?,?,?,?,?)");
+        cs.setString(1, username);
+        cs.setInt(2, siteId);
+        cs.setString(3, param[0]);
+        cs.setString(4, param[1]);
+        cs.setString(5, param[2]);
+        cs.setString(6, param[3]);
+        cs.setString(7, param[4]);
+        cs.execute();
     }
 }

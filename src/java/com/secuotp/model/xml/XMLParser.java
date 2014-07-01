@@ -52,6 +52,11 @@ public class XMLParser {
             return null;
         }
     }
+    
+    public NodeList getNodeFromTag(String tagname){
+        return doc.getElementsByTagName(tagname);
+        
+    }
 
     public String getAttibuteFromTag(String tagName, String attibuteName, int numberItem) {
         list = doc.getElementsByTagName(tagName);
@@ -61,7 +66,10 @@ public class XMLParser {
         }else{
             return null;
         }
-            
-
+    }
+    
+    public int getNumberItem(String tagName){
+        list = doc.getElementsByTagName(tagName);
+        return list.getLength();
     }
 }
