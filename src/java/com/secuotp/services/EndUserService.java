@@ -7,7 +7,8 @@
 package com.secuotp.services;
 
 import com.secuotp.model.Site;
-import com.secuotp.model.SiteUser;
+import com.secuotp.model.EndUser;
+import com.secuotp.model.XMLParameter;
 import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParser;
@@ -41,13 +42,25 @@ public class EndUserService {
             String serial = parse.getDataFromTag("serial", 0);
 
             if (Site.authenService(domain, serial) && !Site.checkDisabled(domain)) {
-                SiteUser user = SiteUser.getSiteUser(parse.getDataFromTag("username", 0), domain);
+                EndUser user = EndUser.getEndUser(parse.getDataFromTag("username", 0), domain);
                 
                 if(user == null){
-                    return XMLCreate.createResponseXML(301, "Generate One-Time Password", StringText.GET_END_USER_DATA_301).asXML();
+                    return XMLCreate.createResponseXML(301, "Get End-User Data", StringText.GET_END_USER_DATA_301).asXML();
                 }
                 
-                XMLCreate
+                XMLParameter param = new XMLParameter();
+                param.add("username", user.getUsername());
+                param.add("email", user.getEmail());
+                param.add("fname", user.getFirstname());
+                param.add("lname", user.getLastname());
+                param.add("phone", user.getPhone());
+                if(parse.getDataFromTag("type", 0).equals("full")){
+                    param.add("serial", user.getSerialNumber());
+                    param.add("removal", user.getRemovalCode());
+                    param.add("mobile", "" + user.getMobileMode());
+                }
+                
+                return XMLCreate.createResponseXMLWithData("Get End-User Data", StringText.GET_END_USER_DATA_101, param).asXML();
             }
             return "<a>Passed</a>";
         }

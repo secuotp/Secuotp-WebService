@@ -5,6 +5,7 @@
  */
 package com.secuotp.model.xml;
 
+import com.secuotp.model.XMLParameter;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.tree.DefaultDocument;
@@ -25,14 +26,19 @@ public class XMLCreate {
         d.normalize();
         return d;
     }
-    
-    public static Document createResponseXMLWithData(String service, String message, ) {
+
+    public static Document createResponseXMLWithData(String service, String message, XMLParameter param) {
         Document d = new DefaultDocument();
 
-        Element root = d.addElement("secuotp").addAttribute("status", "" + error);
+        Element root = d.addElement("secuotp").addAttribute("status", "101");
         root.addElement("service").addText(service);
         root.addElement("message").addText(message);
-
+        Element responseNode = root.addElement("response");
+        while (param.hasNext()) {
+            String[] parameter = param.pop();
+            responseNode.addElement(parameter[0]).setText(parameter[1]);
+        }
+        
         d.normalize();
         return d;
     }

@@ -6,7 +6,7 @@
 package com.secuotp.services;
 
 import com.secuotp.model.Site;
-import com.secuotp.model.SiteUser;
+import com.secuotp.model.EndUser;
 import com.secuotp.model.connection.ConnectionAgent;
 import com.secuotp.model.generate.TOTPPattern;
 import com.secuotp.model.sms.SMSSender;
@@ -51,7 +51,7 @@ public class OtpService {
 
             if (Site.authenService(domain, serial) && !Site.checkDisabled(domain)) {
                 Site site = Site.getSite(domain);
-                SiteUser user = SiteUser.getSiteUser(parse.getDataFromTag("username", 0), domain);
+                EndUser user = EndUser.getEndUser(parse.getDataFromTag("username", 0), domain);
 
                 if (user == null) {
                     return XMLCreate.createResponseXML(301, "Generate One-Time Password", StringText.GENERATE_OTP_301_1).asXML();
@@ -101,7 +101,7 @@ public class OtpService {
 
             if (Site.authenService(domain, serial) && !Site.checkDisabled(domain)) {
                 Site site = Site.getSite(domain);
-                SiteUser user = SiteUser.getSiteUser(parse.getDataFromTag("username", 0), domain);
+                EndUser user = EndUser.getEndUser(parse.getDataFromTag("username", 0), domain);
 
                 if (user == null) {
                     return XMLCreate.createResponseXML(301, "Generate One-Time Password", StringText.GENERATE_OTP_301_1).asXML();

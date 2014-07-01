@@ -9,7 +9,6 @@ import com.secuotp.model.connection.ConnectionAgent;
 import com.secuotp.model.generate.SerialNumber;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,7 +20,7 @@ import java.util.logging.Logger;
  *
  * @author zenology
  */
-public class SiteUser extends People {
+public class EndUser extends People {
 
     private String siteUserId;
     private String siteId;
@@ -79,7 +78,7 @@ public class SiteUser extends People {
 
     }
     
-    public static SiteUser getSiteUser(String username, String domain){
+    public static EndUser getEndUser(String username, String domain){
         try {
             Connection con = ConnectionAgent.getInstance();
             String sql = "SELECT * FROM end_user WHERE username = ? AND site_id = (SELECT site_id FROM site WHERE domain = ? LIMIT 0, 1)";
@@ -89,7 +88,7 @@ public class SiteUser extends People {
             
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
-                SiteUser user = new SiteUser();
+                EndUser user = new EndUser();
                 user.setSiteUserId("" + rs.getInt(1));
                 user.setSiteId("" + rs.getInt(2));
                 user.setUsername(rs.getString(3));
@@ -103,15 +102,13 @@ public class SiteUser extends People {
                 
                 return user;
             }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(SiteUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(SiteUser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(EndUser.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
 
-    public static boolean addSiteUser(SiteUser user, String domainName, String serialNumber) throws ClassNotFoundException, SQLException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static boolean addEndUser(EndUser user, String domainName, String serialNumber) throws ClassNotFoundException, SQLException, NoSuchAlgorithmException, UnsupportedEncodingException {
         Connection con = ConnectionAgent.getInstance();
         String siteId = getSiteId(con, domainName, serialNumber);
 
@@ -185,10 +182,8 @@ public class SiteUser extends People {
             
             int row = ps.executeUpdate();
             return row > 0;
-        } catch (SQLException ex) {
-            Logger.getLogger(SiteUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(SiteUser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(EndUser.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }

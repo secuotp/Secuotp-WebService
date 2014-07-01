@@ -6,7 +6,7 @@
 package com.secuotp.services;
 
 import com.secuotp.model.Site;
-import com.secuotp.model.SiteUser;
+import com.secuotp.model.EndUser;
 import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParser;
@@ -44,8 +44,8 @@ public class ManageService {
             String serial = parse.getDataFromTag("serial", 0);
 
             if (Site.authenService(domain, serial) && !Site.checkDisabled(domain)) {
-                SiteUser user = createSiteUserXML(xml);
-                if (SiteUser.addSiteUser(user, domain, serial)) {
+                EndUser user = createSiteUserXML(xml);
+                if (EndUser.addEndUser(user, domain, serial)) {
                     return XMLCreate.createResponseXML(100, "Register End-User", StringText.REGISTER_END_USER_100).asXML();
                 } else {
                     return XMLCreate.createResponseXML(200, "Register End-User", StringText.REGISTER_END_USER_200).asXML();
@@ -71,7 +71,7 @@ public class ManageService {
                 String username = parse.getDataFromTag("username", 0);
                 String removalCode = parse.getDataFromTag("code", 0);
 
-                if (SiteUser.disableEndUser(username, removalCode)) {
+                if (EndUser.disableEndUser(username, removalCode)) {
                     return XMLCreate.createResponseXML(100, "Disable End-User", StringText.DISABLE_END_USER_100).asXML();
                 } else {
                     return XMLCreate.createResponseXML(200, "Disable End-User", StringText.DISABLE_END_USER_200).asXML();
@@ -84,9 +84,9 @@ public class ManageService {
         return XMLCreate.createResponseXML(203, "Disable End-User", StringText.ERROR_203).asXML();
     }
 
-    private SiteUser createSiteUserXML(String xml) {
+    private EndUser createSiteUserXML(String xml) {
         XMLParser parse = new XMLParser(xml);
-        SiteUser siteUser = new SiteUser();
+        EndUser siteUser = new EndUser();
 
         siteUser.setUsername(parse.getDataFromTag("username", 0));
         siteUser.setEmail(parse.getDataFromTag("email", 0));
