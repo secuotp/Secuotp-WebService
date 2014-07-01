@@ -25,4 +25,15 @@ public class XMLCreate {
         d.normalize();
         return d;
     }
+    
+    public static Document createResponseXMLWithData(String service, String message, ) {
+        Document d = new DefaultDocument();
+
+        Element root = d.addElement("secuotp").addAttribute("status", "" + error);
+        root.addElement("service").addText(service);
+        root.addElement("message").addText(message);
+
+        d.normalize();
+        return d;
+    }
 }

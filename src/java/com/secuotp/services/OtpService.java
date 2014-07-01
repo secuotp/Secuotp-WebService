@@ -35,7 +35,7 @@ import org.xml.sax.SAXException;
  * @author zenology
  */
 @Path("/otp")
-public class Otp {
+public class OtpService {
 
     @POST
     @Path("/generate")

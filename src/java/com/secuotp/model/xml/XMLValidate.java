@@ -5,7 +5,7 @@
  */
 package com.secuotp.model.xml;
 
-import com.secuotp.services.Otp;
+import com.secuotp.services.OtpService;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;

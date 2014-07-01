@@ -41,4 +41,8 @@ public class StringText {
     public static final String AUTHENTICATE_OTP_301_1 = "Failed to Authenticate One-Time Password: End-User Not Found";
     public static final String AUTHENTICATE_OTP_301_2 = "Failed to Authenticate One-Time Password: Site Not Found";
     public static final String AUTHENTICATE_OTP_303 = "End-User Authication Failed";
+
+    //==================================   GET END-USER DATA   =========================================
+    public static final String GET_END_USER_DATA_XSD = "http://secuotp.sit.kmutt.ac.th/FilePost/File/Get%20End-User%20Data.xsd";
+    public static final String GET_END_USER_DATA_301 = "Failed to Get End-User: End-User Not Found";
 }

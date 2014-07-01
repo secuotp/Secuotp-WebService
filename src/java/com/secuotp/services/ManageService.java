@@ -30,7 +30,7 @@ import org.xml.sax.SAXException;
  * @author Zenology
  */
 @Path("/manage")
-public class Manage {
+public class ManageService {
 
     @POST
     @Path("/register/end-user")
