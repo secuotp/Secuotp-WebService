@@ -11,6 +11,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,6 +30,8 @@ public class Site extends SiteConfig {
     private String descirption;
     private String imgPath;
     private boolean siteDisabled;
+    private int userCount;
+    private Calendar dateCreated;
 
     public boolean isSiteDisabled() {
         return siteDisabled;
@@ -84,6 +89,22 @@ public class Site extends SiteConfig {
         this.imgPath = imgPath;
     }
 
+    public int getUserCount() {
+        return userCount;
+    }
+
+    public void setUserCount(int userCount) {
+        this.userCount = userCount;
+    }
+
+    public Calendar getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Calendar dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
     public static boolean authenService(String domain, String serial) {
         try {
             Connection con = ConnectionAgent.getInstance();
@@ -119,16 +140,20 @@ public class Site extends SiteConfig {
                 s.setDescirption(rs.getString(5));
                 s.setImgPath(rs.getString(6));
                 s.setSiteDisabled(rs.getInt(7) > 0);
-                s.setSiteConfigId("" + rs.getInt(8));
-                s.setPatternName(rs.getString(9));
-                s.setLength(rs.getInt(10));
-                s.setOtpDisable(rs.getInt(11) > 0);
-                s.setTimeZone(rs.getString(12));
+                s.setUserCount(rs.getInt(8));
+                
+                Calendar c = Calendar.getInstance();
+                c.setTimeInMillis(rs.getTimestamp(9).getTime());
+                
+                s.setDateCreated(c);
+                s.setSiteConfigId("" + rs.getInt(10));
+                s.setPatternName(rs.getString(11));
+                s.setLength(rs.getInt(12));
+                s.setOtpDisable(rs.getInt(13) > 0);
+                s.setTimeZone(rs.getString(14));
                 return s;
             }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Site.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
+        } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(Site.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;

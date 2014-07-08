@@ -34,11 +34,7 @@ public class XMLParser {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             doc = builder.parse(new InputSource(new StringReader(xml)));
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(XMLParser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SAXException ex) {
-            Logger.getLogger(XMLParser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (ParserConfigurationException | SAXException | IOException ex) {
             Logger.getLogger(XMLParser.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
