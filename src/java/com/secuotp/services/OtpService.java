@@ -74,7 +74,7 @@ public class OtpService {
                     cst.setInt(1, Integer.parseInt(site.getSiteId()));
                     cst.execute();
 
-                    return XMLCreate.createResponseXML(100, "Generate One-Time Password", StringText.GENERATE_OTP_100).asXML() + response;
+                    return XMLCreate.createResponseXML(100, "Generate One-Time Password", StringText.GENERATE_OTP_100).asXML();
                 } else {
                     return XMLCreate.createResponseXML(401, "Generate One-Time Password", StringText.GENERATE_OTP_401).asXML();
                 }

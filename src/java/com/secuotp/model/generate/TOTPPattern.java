@@ -101,7 +101,7 @@ public class TOTPPattern {
     }
 
     private static ArrayList<Character> getList(int mode) {
-        ArrayList<Character> list = new ArrayList<Character>();
+        ArrayList<Character> list = new ArrayList<>();
         if (mode == 0) {
             for (int i = 0; i < 16; i++) {
                 String hex = Integer.toHexString(i);
@@ -163,7 +163,7 @@ public class TOTPPattern {
         remain.setTimeInMillis(c.getTimeInMillis() + (5 * 1000 * 60));
         DateFormat df = new SimpleDateFormat("HH:mm zz");
         df.setTimeZone(TimeZone.getTimeZone(timeZone));
-        
+    
         String[] returnString = new String[2];
         returnString[0] = totp;
         returnString[1] = df.format(remain.getTime());
