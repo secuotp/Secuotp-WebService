@@ -115,24 +115,27 @@ public class EndUser extends People {
 
         String userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
         String removalCode = SerialNumber.generateRemovalCode(user.getFirstname() + user.getLastname());
-        while (!(isNotDuplicate(userSerialNumber))) {
+        while (!(isNotDuplicateBySerial(userSerialNumber))) {
             userSerialNumber = SerialNumber.generateSerialNumber(user.getEmail());
         }
+        if (isNotDuplicateByUsername(user.getUsername())) {
+            String sql = "INSERT INTO end_user (site_id, username, email, firstname, lastname, phone_number, serial_number, removal_code, mobile_mode) VALUES (?,?,?,?,?,?,?,?,0)";
+            PreparedStatement ps = con.prepareCall(sql);
+            ps.setInt(1, Integer.parseInt(siteId));
+            ps.setString(2, user.getUsername());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getFirstname());
+            ps.setString(5, user.getLastname());
+            ps.setString(6, user.getPhone());
+            ps.setString(7, userSerialNumber);
+            ps.setString(8, removalCode);
 
-        String sql = "INSERT INTO end_user (site_id, username, email, firstname, lastname, phone_number, serial_number, removal_code, mobile_mode) VALUES (?,?,?,?,?,?,?,?,0)";
-        PreparedStatement ps = con.prepareCall(sql);
-        ps.setInt(1, Integer.parseInt(siteId));
-        ps.setString(2, user.getUsername());
-        ps.setString(3, user.getEmail());
-        ps.setString(4, user.getFirstname());
-        ps.setString(5, user.getLastname());
-        ps.setString(6, user.getPhone());
-        ps.setString(7, userSerialNumber);
-        ps.setString(8, removalCode);
-
-        int row = ps.executeUpdate();
-
-        return row > 0;
+            int row = ps.executeUpdate();
+            return row > 0;
+        }else{
+            return false;
+        }
+        
 
     }
 
@@ -161,7 +164,7 @@ public class EndUser extends People {
         return null;
     }
 
-    private static boolean isNotDuplicate(String serialNumber) throws SQLException, ClassNotFoundException {
+    private static boolean isNotDuplicateBySerial(String serialNumber) throws SQLException, ClassNotFoundException {
         String sql = "SELECT COUNT(*) FROM end_user WHERE serial_number = ?";
         Connection con = ConnectionAgent.getInstance();
         PreparedStatement ps = con.prepareCall(sql);
@@ -173,6 +176,18 @@ public class EndUser extends People {
         return false;
     }
 
+    private static boolean isNotDuplicateByUsername(String username) throws ClassNotFoundException, SQLException{
+        String sql = "SELECT COUNT(*) FROM end_user WHERE username = ?";
+        Connection con = ConnectionAgent.getInstance();
+        PreparedStatement ps = con.prepareCall(sql);
+        ps.setString(1, username);
+        ResultSet rs = ps.executeQuery();
+        
+        if(rs.next()){
+            return rs.getInt(1) == 0;
+        }
+        return false;
+    }
     public static boolean disableEndUser(String username, String removalCode) {
         try {
             Connection con = ConnectionAgent.getInstance();
