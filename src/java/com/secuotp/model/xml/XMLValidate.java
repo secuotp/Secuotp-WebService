@@ -6,6 +6,7 @@
 package com.secuotp.model.xml;
 
 import com.secuotp.services.OtpService;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
@@ -30,9 +31,9 @@ import org.xml.sax.SAXParseException;
 public class XMLValidate {
 
     private XMLCheck check;
-    private URL schemaFile;
+    private File schemaFile;
 
-    public XMLValidate(URL schemaFile) {
+    public XMLValidate(File schemaFile) {
         check = new XMLCheck();
         this.schemaFile = schemaFile;
     }

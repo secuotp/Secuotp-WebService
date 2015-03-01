@@ -13,6 +13,9 @@ import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParser;
 import com.secuotp.model.xml.XMLValidate;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
@@ -37,9 +40,13 @@ public class EndUserService {
     @Path("/end-user")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String getEndUser(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException {
-        XMLValidate val = new XMLValidate(new URL(StringText.GET_END_USER_DATA_XSD));
-
+    public String getEndUser(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException, IOException {
+        File xmlFile = File.createTempFile("test", "xsd");
+        FileWriter fw = new FileWriter(xmlFile);
+        fw.write(StringText.GET_END_USER_DATA_XSD);
+        fw.close();
+        
+        XMLValidate val = new XMLValidate(xmlFile.getAbsoluteFile());
         if (val.validate(xml, "U-01")) {
             XMLParser parse = new XMLParser(xml);
             String domain = parse.getDataFromTag("domain", 0);
@@ -75,9 +82,13 @@ public class EndUserService {
     @Path("/end-user")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String setEndUser(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException {
-        XMLValidate val = new XMLValidate(new URL(StringText.SET_END_USER_DATA_XSD));
-
+    public String setEndUser(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException, IOException {
+        File xmlFile = File.createTempFile("test", "xsd");
+        FileWriter fw = new FileWriter(xmlFile);
+        fw.write(StringText.SET_END_USER_DATA_XSD);
+        fw.close();
+        
+        XMLValidate val = new XMLValidate(xmlFile.getAbsoluteFile());
         if (val.validate(xml, "U-02")) {
             XMLParser parse = new XMLParser(xml);
             String domain = parse.getDataFromTag("domain", 0);
@@ -122,4 +133,5 @@ public class EndUserService {
 
         return XMLCreate.createResponseXML(203, "Set End-User Data", StringText.ERROR_203).asXML();
     }
+    
 }

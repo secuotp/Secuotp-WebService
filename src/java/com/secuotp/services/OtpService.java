@@ -14,6 +14,8 @@ import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParser;
 import com.secuotp.model.xml.XMLValidate;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -42,7 +44,12 @@ public class OtpService {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public String generate(@FormParam("request") String xml) throws SAXException, IOException, ParseException, SOAPException, SQLException, ClassNotFoundException {
-        XMLValidate xmlVal = new XMLValidate(new URL(StringText.GENERATE_OTP_XSD));
+        File xmlFile = File.createTempFile("test", "xsd");
+        FileWriter fw = new FileWriter(xmlFile);
+        fw.write(StringText.GENERATE_OTP_XSD);
+        fw.close();
+
+        XMLValidate xmlVal = new XMLValidate(xmlFile.getAbsoluteFile());
 
         if (xmlVal.validate(xml, "G-01")) {
             XMLParser parse = new XMLParser(xml);
@@ -91,8 +98,13 @@ public class OtpService {
     @Path("/authenticate")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String authenOTP(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException {
-        XMLValidate xmlVal = new XMLValidate(new URL(StringText.AUTHENTICATE_OTP_XSD));
+    public String authenOTP(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException, IOException {
+        File xmlFile = File.createTempFile("test", "xsd");
+        FileWriter fw = new FileWriter(xmlFile);
+        fw.write(StringText.AUTHENTICATE_OTP_XSD);
+        fw.close();
+        
+        XMLValidate xmlVal = new XMLValidate(xmlFile.getAbsoluteFile());
 
         if (xmlVal.validate(xml, "A-01")) {
             XMLParser parse = new XMLParser(xml);
@@ -117,7 +129,7 @@ public class OtpService {
                     String password = parse.getDataFromTag("password", 0);
                     if (password.equalsIgnoreCase(totpAndRemaining[0])) {
                         executeProcedure(Integer.parseInt(site.getSiteId()));
-                        
+
                         return XMLCreate.createResponseXML(100, "Authenticate One-Time Password", StringText.AUTHENTICATE_OTP_100).asXML();
                     } else {
                         return XMLCreate.createResponseXML(303, "Authenticate One-Time Password", StringText.AUTHENTICATE_OTP_303).asXML();
@@ -129,7 +141,7 @@ public class OtpService {
                     String password = parse.getDataFromTag("password", 0);
                     if (password.equalsIgnoreCase(totpAndRemaining[0])) {
                         executeProcedure(Integer.parseInt(site.getSiteId()));
-                        
+
                         return XMLCreate.createResponseXML(100, "Authenticate One-Time Password", StringText.AUTHENTICATE_OTP_100).asXML();
                     } else {
                         return XMLCreate.createResponseXML(303, "Authenticate One-Time Password", StringText.AUTHENTICATE_OTP_303).asXML();

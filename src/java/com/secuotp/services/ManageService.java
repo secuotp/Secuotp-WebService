@@ -11,6 +11,8 @@ import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParser;
 import com.secuotp.model.xml.XMLValidate;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,7 +39,12 @@ public class ManageService {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public String registerEndUser(@FormParam("request") String xml) throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NoSuchAlgorithmException {
-        XMLValidate val = new XMLValidate(new URL(StringText.REGISTER_END_USER_XSD));
+        File xmlFile = File.createTempFile("test", "xsd");
+        FileWriter fw = new FileWriter(xmlFile);
+        fw.write(StringText.REGISTER_END_USER_XSD);
+        fw.close();
+        
+        XMLValidate val = new XMLValidate(xmlFile.getAbsoluteFile());
         if (val.validate(xml, "M-01")) {
             XMLParser parse = new XMLParser(xml);
             String domain = parse.getDataFromTag("domain", 0);
@@ -61,8 +68,13 @@ public class ManageService {
     @Path("/disable/end-user")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String disableEndUser(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException {
-        XMLValidate val = new XMLValidate(new URL(StringText.DISABLE_END_USER_XSD));
+    public String disableEndUser(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException, IOException {
+        File xmlFile = File.createTempFile("test", "xsd");
+        FileWriter fw = new FileWriter(xmlFile);
+        fw.write(StringText.DISABLE_END_USER_XSD);
+        fw.close();
+        
+        XMLValidate val = new XMLValidate(xmlFile.getAbsoluteFile());
         if (val.validate(xml, "M-02")) {
             XMLParser parse = new XMLParser(xml);
             String domain = parse.getDataFromTag("domain", 0);
