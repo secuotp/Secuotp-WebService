@@ -6,6 +6,7 @@
 package com.secuotp.model.messaging;
 
 import com.nexmo.messaging.sdk.NexmoSmsClient;
+import com.nexmo.messaging.sdk.NexmoSmsClientSSL;
 import com.nexmo.messaging.sdk.SmsSubmissionResult;
 import com.nexmo.messaging.sdk.messages.TextMessage;
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class SMSSender {
     public static SmsSubmissionResult nexmoSMS(String from, String to, String msg) throws IOException{
         NexmoSmsClient client;
         try {
-            client = new NexmoSmsClient(API_KEY, SECRET);
+            client = new NexmoSmsClientSSL(API_KEY, SECRET);
         } catch (Exception ex) {
             System.err.println("Failed to instanciate a Nexmo Client");
             ex.printStackTrace();
