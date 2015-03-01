@@ -167,7 +167,7 @@ public class StringText {
     public static final String AUTHENTICATE_OTP_100 = "End-User Authication Passed";
     public static final String AUTHENTICATE_OTP_301_1 = "Failed to Authenticate One-Time Password: End-User Not Found";
     public static final String AUTHENTICATE_OTP_301_2 = "Failed to Authenticate One-Time Password: Site Not Found";
-    public static final String AUTHENTICATE_OTP_303 = "End-User Authication Failed";
+    public static final String AUTHENTICATE_OTP_303 = "End-User Authentication Failed";
 
     //==================================   GET END-USER DATA   =========================================
     public static final String GET_END_USER_DATA_XSD = "<xs:schema attributeFormDefault=\"unqualified\" elementFormDefault=\"qualified\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n" +

@@ -5,11 +5,12 @@
  */
 package com.secuotp.services;
 
+import com.nexmo.messaging.sdk.SmsSubmissionResult;
 import com.secuotp.model.Site;
 import com.secuotp.model.EndUser;
 import com.secuotp.model.connection.ConnectionAgent;
 import com.secuotp.model.generate.TOTPPattern;
-import com.secuotp.model.sms.SMSSender;
+import com.secuotp.model.messaging.SMSSender;
 import com.secuotp.model.text.StringText;
 import com.secuotp.model.xml.XMLCreate;
 import com.secuotp.model.xml.XMLParser;
@@ -18,7 +19,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,6 +39,8 @@ import org.xml.sax.SAXException;
 @Path("/otp")
 public class OtpService {
 
+    public static final int NEXMO_SUCCESS = 0;
+    
     @POST
     @Path("/generate")
     @Consumes(MediaType.APPLICATION_XML)
@@ -73,9 +75,9 @@ public class OtpService {
                 //End of OTP Generator
 
                 String message = site.getSiteName() + "\nYour OTP: " + totpAndRemaining[0] + "\nPassword expired at\n" + totpAndRemaining[1];
-                String response = SMSSender.sendSMS(user.getPhone(), message);
-
-                if (response != null) {
+                SmsSubmissionResult result = SMSSender.nexmoSMS("SecuOTP", user.getPhone(), message);
+                
+                if (result.getStatus() == NEXMO_SUCCESS) {
                     Connection con = ConnectionAgent.getInstance();
                     CallableStatement cst = con.prepareCall("CALL add_site_sms_log(?)");
                     cst.setInt(1, Integer.parseInt(site.getSiteId()));
@@ -85,7 +87,6 @@ public class OtpService {
                 } else {
                     return XMLCreate.createResponseXML(401, "Generate One-Time Password", StringText.GENERATE_OTP_401).asXML();
                 }
-
             } else {
                 return XMLCreate.createResponseXML(300, "Generate One-Time Password", StringText.GENERATE_OTP_300).asXML();
             }
