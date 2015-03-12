@@ -6,6 +6,7 @@
 package com.secuotp.model.generate;
 
 import com.secuotp.model.time.NTPTime;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -152,8 +153,8 @@ public class TOTPPattern {
         return totp;
     }
 
-    public static String[] generateActualTOTP(int delayMin, String userSerial, String siteStrial, String pattern, int length, String timeZone) {
-        Calendar c = NTPTime.reformatTime(NTPTime.getNTPCalendar(), 0, delayMin, 0);
+    public static String[] generateActualTOTP(int delayMin, int delaySec, String userSerial, String siteStrial, String pattern, int length, String timeZone) throws NoSuchAlgorithmException {
+        Calendar c = NTPTime.reformatTime(NTPTime.getNTPCalendar(), 0, delayMin, delaySec);
 
         String totp = TOTP.getOTP(userSerial, siteStrial, c, 8);
         totp = TOTPPattern.toPattern(totp, pattern);

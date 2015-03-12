@@ -9,12 +9,10 @@ package com.secuotp.model.generate;
  * (http://trustee.ietf.org/license-info).
  */
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.security.GeneralSecurityException;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,209 +24,74 @@ import java.util.logging.Logger;
  * @author Johan Rydell, PortWise, Inc.
  */
 public class TOTP {
-
-    private static volatile TOTP instance = null;
-
-    private TOTP() {
-    }
-
-    /**
-     * This method uses the JCE to provide the crypto algorithm. HMAC computes a
-     * Hashed Message Authentication Code with the crypto hash algorithm as a
-     * parameter.
-     *
-     * @return
-     */
-    public static synchronized TOTP getInstance() {
-        if (instance == null) {
-            instance = new TOTP();
+ private static String hmacSHA1(String key, String message) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        if(key.length() > 64){
+            key = encryptData(key, "SHA-1");
+        }else if(key.length() < 64) {
+            key = key + (0x00 * (64 - key.length()));
         }
-        return instance;
-
+        long oKeyPad = (0x5c * 64) ^ Long.parseLong(key);
+        long iKeyPad = (0x36 * 64) ^ Long.parseLong(key);
+        
+        String oKeyString = Long.toHexString(oKeyPad).toUpperCase();
+        String iKeyString = Long.toHexString(iKeyPad).toUpperCase();
+        
+        return encryptData(oKeyString + encryptData(iKeyString + message, "SHA-1"), "SHA-1");
+        
     }
+    
+    private static String encryptData(String seed, String method) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        StringBuilder hexString = new StringBuilder();
+        MessageDigest stringDigest = MessageDigest.getInstance(method);
+        byte[] buffer = stringDigest.digest(seed.getBytes("utf-8"));
 
-    private static byte[] hmac_sha(String crypto, byte[] keyBytes, byte[] text) {
-        try {
-            Mac hmac;
-            hmac = Mac.getInstance(crypto);
-            SecretKeySpec macKey = new SecretKeySpec(keyBytes, "RAW");
-            hmac.init(macKey);
-            return hmac.doFinal(text);
-        } catch (GeneralSecurityException gse) {
-            throw new UndeclaredThrowableException(gse);
+        for (int i = 0; i < buffer.length; i++) {
+            if ((0xff & buffer[i]) < 0x10) {
+                hexString.append("0").append(Integer.toHexString((0xFF & buffer[i])));
+            } else {
+                hexString.append(Integer.toHexString(0xFF & buffer[i]));
+            }
         }
+
+        return hexString.toString();
     }
-
-    /**
-     * This method converts a HEX string to Byte[]
-     *
-     * @param hex : the HEX string
-     *
-     * @return: a byte array
-     */
-    private static byte[] hexStr2Bytes(String hex) {
-        // Adding one byte to get the right conversion
-        // Values starting with "0" can be converted
-        byte[] bArray = new BigInteger("10" + hex, 16).toByteArray();
-        // Copy all the REAL bytes, not the "first"
-        byte[] ret = new byte[bArray.length - 1];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = bArray[i + 1];
-        }
-        return ret;
-    }
-
-    private static final int[] DIGITS_POWER
-            // 0 1 2 3 4 5 6 7 8
-            = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
-
-    /**
-     * This method generates a TOTP value for the given set of parameters.
-     *
-     * @param key : the shared secret, HEX encoded
-     * @param time : a value that reflects a time
-     * @param returnDigits : number of digits to return
-     *
-     * @return: a numeric String in base 10 that includes
-     * {@link truncationDigits} digits
-     */
-    public static String generateTOTP(String key, String time,
-            String returnDigits) {
-        return generateTOTP(key, time, returnDigits, "HmacSHA1");
-    }
-
-    /**
-     * This method generates a TOTP value for the given set of parameters.
-     *
-     * @param key : the shared secret, HEX encoded
-     * @param time : a value that reflects a time
-     * @param returnDigits : number of digits to return
-     *
-     * @return: a numeric String in base 10 that includes
-     * {@link truncationDigits} digits
-     */
-    public static String generateTOTP256(String key, String time,
-            String returnDigits) {
-        return generateTOTP(key, time, returnDigits, "HmacSHA256");
-
-    }
-
-    /**
-     * This method generates a TOTP value for the given set of parameters.
-     *
-     * @param key : the shared secret, HEX encoded
-     * @param time : a value that reflects a time
-     * @param returnDigits : number of digits to return
-     *
-     * @return: a numeric String in base 10 that includes
-     * {@link truncationDigits} digits
-     */
-    public static String generateTOTP512(String key, String time,
-            String returnDigits) {
-        return generateTOTP(key, time, returnDigits, "HmacSHA512");
-    }
-
-    /**
-     * This method generates a TOTP value for the given set of parameters.
-     *
-     * @param key : the shared secret, HEX encoded
-     * @param time : a value that reflects a time
-     * @param returnDigits : number of digits to return
-     * @param crypto : the crypto function to use
-     *
-     * @return: a numeric String in base 10 that includes
-     * {@link truncationDigits} digits
-     */
-    public static String generateTOTP(String key, String time,
-            String returnDigits, String crypto) {
-        int codeDigits = Integer.decode(returnDigits).intValue();
+    
+    public static String generateTOTP(String message, String time, int digits) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        int[] power = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
         String result = null;
-        // Using the counter
-        // First 8 bytes are for the movingFactor
-        // Compliant with base RFC 4226 (HOTP)
-        while (time.length() < 16) {
+        
+        while(time.length() < 16){
             time = "0" + time;
         }
-        // Get the HEX in a Byte[]
-        byte[] msg = hexStr2Bytes(time);
-        byte[] k = hexStr2Bytes(key);
-
-        byte[] hash = hmac_sha(crypto, k, msg);
-        // put selected bytes into result int
-        int offset = hash[hash.length - 1] & 0xf;
-        int binary = ((hash[offset] & 0x7f) << 24)
-                | ((hash[offset + 1] & 0xff) << 16)
-                | ((hash[offset + 2] & 0xff) << 8) | (hash[offset + 3] & 0xff);
-        int otp = binary % DIGITS_POWER[codeDigits];
-        result = Integer.toString(otp);
-        while (result.length() < codeDigits) {
+        
+        String hmac = hmacSHA1(time, message);
+        byte[] hmacByte = hmac.getBytes();
+        int offset = hmacByte[hmacByte.length - 1] & 0xf;
+        
+        int binA = (hmacByte[offset] & 0x7f) << 24;
+        int binB = (hmacByte[offset + 1] & 0xff) << 16;
+        int binC = (hmacByte[offset + 2] & 0xff) << 8;
+        int binD = hmacByte[offset + 3] & 0xff;
+        
+        int binary = binA | binB | binC | binD;
+        String otp = "" + binary % power[digits];
+        result = otp;
+        
+        while(result.length() < digits) {
             result = "0" + result;
         }
+        
         return result;
     }
-
-    /*public static void main(String[] args) { // Seed for HMAC-SHA1 - 20 bytes
-        String seed = "3132333435363738393031323334353637383930"; // Seed for
-        //HMAC SHA256 - 32 bytes 
-        String seed32
-                = "3132333435363738393031323334353637383930" + "313233343536373839303132";
-        // Seed for HMAC-SHA512 - 64 bytes 
-        String seed64
-                = "3132333435363738393031323334353637383930"
-                + "3132333435363738393031323334353637383930"
-                + "3132333435363738393031323334353637383930" + "31323334";
-        long T0 = 0;
-        //Delay Time = 30 Sec 
-        long X = 30000;
-        long testTime[] = {59L, 1111111109L, 1111111111L, 1234567890L, 2000000000L, 20000000000L, 0L, 0L
-            + 15000, 0L + 29000, 0L + 30000, 0L + 59000, 0L + 60000};
-        String steps = "0";
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
-        try {
-            System.out.println("+---------------------------+------------------+--------+--------+");
-            System.out.println("|            Time           |  Value of T(Hex) |  TOTP  |  Mode  |");
-            System.out.println("+---------------------------+------------------+--------+--------+");
-            for (int i = 0; i < testTime.length; i++) {
-                long T
-                        = (testTime[i] - T0) / X;
-                steps = Long.toHexString(T).toUpperCase();
-                while (steps.length() < 16) {
-                    steps = "0" + steps;
-                }
-                DateFormat format
-                        = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss:SS a");
-                String fmtTime
-                        = format.format(new Date(testTime[i]));
-                System.out.print("| " + fmtTime
-                        + " | " + steps + " |");
-                System.out.println(generateTOTP(seed, steps, "8",
-                        "HmacSHA1") + "| SHA1   |");
-                System.out.print("| " + fmtTime + " | "
-                        + steps + " |");
-                System.out.println(generateTOTP(seed32, steps, "8",
-                        "HmacSHA256") + "| SHA256 |");
-                System.out.print("| " + fmtTime + " | "
-                        + steps + " |");
-                System.out.println(generateTOTP(seed64, steps, "8",
-                        "HmacSHA512") + "| SHA512 |");
-                System.out.println(
-                        "+---------------------------+------------------+"
-                        + "--------+--------+");
-            }
-        } catch (final Exception e) {
-            System.out.println("Error : " + e);
-        }
-    }*/
 
     private static String toHex(String arg) throws UnsupportedEncodingException {
         return String.format("%040x", new BigInteger(1, arg.getBytes("utf-8")));
     }
 
-    public static String getOTP(String userSerial, String siteSerial, Calendar time, int digit) {
+    public static String getOTP(String userSerial, String siteSerial, Calendar time, int digit) throws NoSuchAlgorithmException {
         try {
             String key = toHex(userSerial + "-" + siteSerial);
-            String otp = generateTOTP512(key, "" + time.getTimeInMillis(), "" + (digit));
+            String otp = generateTOTP(key, "" + time.getTimeInMillis(), digit);
 
             return otp;
         } catch (UnsupportedEncodingException ex) {

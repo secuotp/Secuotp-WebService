@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -45,7 +46,7 @@ public class OtpService {
     @Path("/generate")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String generate(@FormParam("request") String xml) throws SAXException, IOException, ParseException, SOAPException, SQLException, ClassNotFoundException {
+    public String generate(@FormParam("request") String xml) throws SAXException, IOException, ParseException, SOAPException, SQLException, ClassNotFoundException, NoSuchAlgorithmException {
         File xmlFile = File.createTempFile("test", "xsd");
         FileWriter fw = new FileWriter(xmlFile);
         fw.write(StringText.GENERATE_OTP_XSD);
@@ -71,7 +72,7 @@ public class OtpService {
                 }
 
                 //OTP Generator
-                String[] totpAndRemaining = TOTPPattern.generateActualTOTP(5, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
+                String[] totpAndRemaining = TOTPPattern.generateActualTOTP(5, 0, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
                 //End of OTP Generator
 
                 String message = site.getSiteName() + "\nYour OTP: " + totpAndRemaining[0] + "\nPassword expired at\n" + totpAndRemaining[1];
@@ -99,7 +100,7 @@ public class OtpService {
     @Path("/authenticate")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public String authenOTP(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException, IOException {
+    public String authenOTP(@FormParam("request") String xml) throws MalformedURLException, ClassNotFoundException, SQLException, IOException, NoSuchAlgorithmException {
         File xmlFile = File.createTempFile("test", "xsd");
         FileWriter fw = new FileWriter(xmlFile);
         fw.write(StringText.AUTHENTICATE_OTP_XSD);
@@ -125,7 +126,7 @@ public class OtpService {
                 String[] totpAndRemaining;
                 if (!user.getMobileMode()) {
                     //OTP Generator
-                    totpAndRemaining = TOTPPattern.generateActualTOTP(5, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
+                    totpAndRemaining = TOTPPattern.generateActualTOTP(5, 0, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
 
                     String password = parse.getDataFromTag("password", 0);
                     if (password.equalsIgnoreCase(totpAndRemaining[0])) {
@@ -137,7 +138,7 @@ public class OtpService {
                     }
                 } else {
                     //Wait for iOS Swift Lang Complete to Debug This Section;
-                    totpAndRemaining = TOTPPattern.generateActualTOTP(1, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
+                    totpAndRemaining = TOTPPattern.generateActualTOTP(0, 30, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
 
                     String password = parse.getDataFromTag("password", 0);
                     if (password.equalsIgnoreCase(totpAndRemaining[0])) {
