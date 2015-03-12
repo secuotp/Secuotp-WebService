@@ -16,7 +16,7 @@ import java.sql.SQLException;
  */
 public class ConnectionAgent {
     private static final String DRIVER = "com.mysql.jdbc.Driver";
-    private static final String URL = "jdbc:mysql://192.168.0.1:3306/secuotp";
+    private static final String URL = "jdbc:mysql://128.199.82.168:3306/secuotp";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "secuotp";
     

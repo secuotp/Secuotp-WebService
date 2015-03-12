@@ -90,7 +90,9 @@ public class TOTP {
 
     public static String getOTP(String userSerial, String siteSerial, Calendar time, int digit) throws NoSuchAlgorithmException {
         try {
-            String key = toHex(userSerial + "-" + siteSerial);
+            // if userSerial = A && siteSerial = B && hmac(userSerial siteSerial SecuOTP) = C
+            // then key = A-B-C
+            String key = toHex(userSerial + "-" + siteSerial + "-" + TOTP.hmacSHA1(userSerial + " " + siteSerial + " " +"SecuOTP", "SecuOTP"));
             String otp = generateTOTP(key, "" + time.getTimeInMillis(), digit);
 
             return otp;
