@@ -92,7 +92,8 @@ public class TOTP {
         try {
             // if userSerial = A && siteSerial = B && hmac(userSerial siteSerial SecuOTP) = C
             // then key = A-B-C
-            String key = toHex(userSerial + "-" + siteSerial + "-" + TOTP.hmacSHA1(userSerial + " " + siteSerial + " " +"SecuOTP", "SecuOTP"));
+            long privateKey = TOTP.str2num(userSerial + " " + siteSerial + " " +"SecuOTP");
+            String key = toHex(userSerial + "-" + siteSerial + "-" + TOTP.hmacSHA1("" + privateKey, "SecuOTP"));
             String otp = generateTOTP(key, "" + time.getTimeInMillis(), digit);
 
             return otp;
@@ -100,5 +101,15 @@ public class TOTP {
             Logger.getLogger(TOTP.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+    
+    private static long str2num(String text){
+        char[] byteText = text.toCharArray();
+        long result = 0;
+        for(int i: byteText){
+            result += i;
+        }
+        
+        return result;
     }
 }

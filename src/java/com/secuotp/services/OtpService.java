@@ -72,7 +72,7 @@ public class OtpService {
                 }
 
                 //OTP Generator
-                String[] totpAndRemaining = TOTPPattern.generateActualTOTP(5, 0, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
+                String[] totpAndRemaining = TOTPPattern.generateActualTOTP(10, 0, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
                 //End of OTP Generator
 
                 String message = site.getSiteName() + "\nYour OTP: " + totpAndRemaining[0] + "\nPassword expired at\n" + totpAndRemaining[1];
@@ -126,7 +126,7 @@ public class OtpService {
                 String[] totpAndRemaining;
                 if (!user.getMobileMode()) {
                     //OTP Generator
-                    totpAndRemaining = TOTPPattern.generateActualTOTP(5, 0, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
+                    totpAndRemaining = TOTPPattern.generateActualTOTP(10, 0, user.getSerialNumber(), site.getSerialNumber(), site.getPatternName(), site.getLength(), site.getTimeZone());
 
                     String password = parse.getDataFromTag("password", 0);
                     if (password.equalsIgnoreCase(totpAndRemaining[0])) {
