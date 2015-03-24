@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app id="WebApp_ID" version="2.5"
-         xmlns="http://java.sun.com/xml/ns/javaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+<web-app id="WebApp_ID" version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <display-name>Jersey</display-name>
     <servlet>
         <display-name>Rest Servlet</display-name>
@@ -16,4 +14,17 @@
         <servlet-name>RestServlet</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+    <intercept-url access="permitAll" pattern="/dontSecure/**"/>
+    <security-constraint>
+        <display-name>No SSL</display-name>
+        <web-resource-collection>
+            <web-resource-name>s</web-resource-name>
+            <description/>
+            <url-pattern>/database/*</url-pattern>
+        </web-resource-collection>
+        <user-data-constraint>
+            <description/>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
 </web-app>
