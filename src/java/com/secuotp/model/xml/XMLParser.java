@@ -39,10 +39,10 @@ public class XMLParser {
         }
     }
 
-    public String getDataFromTag(String tagName, int numberItem) {
+    public String getDataFromTag(String tagName, int itemIndex) {
         list = doc.getElementsByTagName(tagName);
         if (list.getLength() > 0) {
-            Node n = list.item(numberItem);
+            Node n = list.item(itemIndex);
             return n.getTextContent();
         } else {
             return null;

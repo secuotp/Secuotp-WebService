@@ -8,7 +8,10 @@ package com.secuotp.services;
 import com.nexmo.messaging.sdk.SmsSubmissionResult;
 import com.secuotp.model.Site;
 import com.secuotp.model.EndUser;
+import com.secuotp.model.Migration;
+import com.secuotp.model.XMLParameter;
 import com.secuotp.model.connection.ConnectionAgent;
+import com.secuotp.model.generate.SerialNumber;
 import com.secuotp.model.generate.TOTPPattern;
 import com.secuotp.model.messaging.SMSSender;
 import com.secuotp.model.text.StringText;
@@ -41,7 +44,7 @@ import org.xml.sax.SAXException;
 public class OtpService {
 
     public static final int NEXMO_SUCCESS = 0;
-    
+
     @POST
     @Path("/generate")
     @Consumes(MediaType.APPLICATION_XML)
@@ -77,7 +80,7 @@ public class OtpService {
 
                 String message = site.getSiteName() + "\nYour OTP: " + totpAndRemaining[0] + "\nPassword expired at\n" + totpAndRemaining[1];
                 SmsSubmissionResult result = SMSSender.nexmoSMS("SecuOTP", user.getPhone(), message);
-                
+
                 if (result.getStatus() == NEXMO_SUCCESS) {
                     Connection con = ConnectionAgent.getInstance();
                     CallableStatement cst = con.prepareCall("CALL add_site_sms_log(?)");
@@ -105,7 +108,7 @@ public class OtpService {
         FileWriter fw = new FileWriter(xmlFile);
         fw.write(StringText.AUTHENTICATE_OTP_XSD);
         fw.close();
-        
+
         XMLValidate xmlVal = new XMLValidate(xmlFile.getAbsoluteFile());
 
         if (xmlVal.validate(xml, "A-01")) {
@@ -152,6 +155,59 @@ public class OtpService {
             }
         }
         return XMLCreate.createResponseXML(203, "Authenticate One-Time Password", StringText.ERROR_203).asXML();
+    }
+
+    @POST
+    @Path("/migrate")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    public String migrateService(@FormParam("request") String xml) throws IOException, ClassNotFoundException, SQLException, NoSuchAlgorithmException {
+        File xmlFile = File.createTempFile("test", "xsd");
+        FileWriter fw = new FileWriter(xmlFile);
+        fw.write(StringText.MIGRATE_OTP_CHANNEL_XSD);
+        fw.close();
+
+        XMLValidate xmlVal = new XMLValidate(xmlFile.getAbsoluteFile());
+
+        if (xmlVal.validate(xml, "O-01")) {
+            XMLParser parse = new XMLParser(xml);
+            String domain = parse.getDataFromTag("domain", 0);
+            String serial = parse.getDataFromTag("serial", 0);
+
+            if (Site.authenService(domain, serial) && !Site.checkDisabled(domain)) {
+                String username = parse.getDataFromTag("username", 0);
+                String channel = parse.getDataFromTag("channel", 0);
+                boolean channelBool = false;
+                if (channel.equalsIgnoreCase("mobile")) {
+                    channelBool = true;
+                }
+
+                Site site = Site.getSite(domain);
+                EndUser user = EndUser.getEndUser(username, domain);
+
+                if (user != null || site != null) {
+                    if ((user.getMobileMode() == true && channelBool != true) || (user.getMobileMode() != true && channelBool == true)) {
+                        return XMLCreate.createResponseXML(402, "Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_402).asXML();
+                    }
+
+                    String migration = "";
+                    int count = 0;
+                    
+                    do {
+                        migration = SerialNumber.generateMigrationCode(serial + user.getSerialNumber() + "Secuotp" + count++);
+                    } while (!Migration.setMigrationCode(site.getSiteId(), user.getSiteUserId(), migration));
+                    
+                    XMLParameter param = new XMLParameter();
+                    param.add("username", user.getUsername());
+                    param.add("migration-code", migration);
+
+                    return XMLCreate.createResponseXMLWithData("Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_101, param).asXML();
+                }
+                return XMLCreate.createResponseXML(301, "Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_301).asXML();
+            }
+            return XMLCreate.createResponseXML(300, "Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_300).asXML();
+        }
+        return XMLCreate.createResponseXML(203, "Migrate One-Time Password Channel", StringText.ERROR_203).asXML();
     }
 
     private static void executeProcedure(int siteId) throws ClassNotFoundException, SQLException {

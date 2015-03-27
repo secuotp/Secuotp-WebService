@@ -259,4 +259,49 @@ public class StringText {
     public static final String SET_END_USER_DATA_202 = "Failed to Set End-User: Wrong Parameter";
     public static final String SET_END_USER_DATA_300 = "Failed to Set End-User: Not Allowed to Set End-User or This site maybe Disabled";
     public static final String SET_END_USER_DATA_301 = "Failed to Set End-User: End-User Not Found";
+    //===========================   MIGRATE ONE-TIME PASSWORD CHANNEL   ==================================
+    public static final String MIGRATE_OTP_CHANNEL_XSD = "<xs:schema attributeFormDefault=\"unqualified\" elementFormDefault=\"qualified\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n" +
+"  <xs:element name=\"secuotp\">\n" +
+"    <xs:complexType>\n" +
+"      <xs:sequence>\n" +
+"        <xs:element name=\"service\">\n" +
+"          <xs:complexType>\n" +
+"            <xs:simpleContent>\n" +
+"              <xs:extension base=\"xs:string\">\n" +
+"                <xs:attribute type=\"xs:string\" name=\"sid\"/>\n" +
+"              </xs:extension>\n" +
+"            </xs:simpleContent>\n" +
+"          </xs:complexType>\n" +
+"        </xs:element>\n" +
+"        <xs:element name=\"authentication\">\n" +
+"          <xs:complexType>\n" +
+"            <xs:sequence>\n" +
+"              <xs:element type=\"xs:string\" name=\"domain\"/>\n" +
+"              <xs:element type=\"xs:string\" name=\"serial\"/>\n" +
+"            </xs:sequence>\n" +
+"          </xs:complexType>\n" +
+"        </xs:element>\n" +
+"        <xs:element name=\"parameter\">\n" +
+"          <xs:complexType>\n" +
+"            <xs:sequence>\n" +
+"              <xs:element type=\"xs:string\" name=\"username\"/>\n" +
+"              <xs:element type=\"enum\" name=\"channel\"/>\n" +
+"            </xs:sequence>\n" +
+"          </xs:complexType>\n" +
+"        </xs:element>\n" +
+"      </xs:sequence>\n" +
+"    </xs:complexType>\n" +
+"  </xs:element>\n" +
+"  <xs:simpleType name=\"enum\">\n" +
+"    <xs:restriction  base=\"xs:string\">\n" +
+"        <xs:enumeration value=\"sms\" />\n" +
+"        <xs:enumeration value=\"mobile\" />\n" +
+"    </xs:restriction >\n" +
+"</xs:simpleType>\n" +
+"</xs:schema>";
+    public static final String MIGRATE_OTP_CHANNEL_101 = "Migrate One-Time Password Success and received Migration Code";
+    public static final String MIGRATE_OTP_CHANNEL_200 = "Failed to Migrate One-Time Password: General Failed";
+    public static final String MIGRATE_OTP_CHANNEL_300 = "Failed to Migrate One-Time Password: Not Allowed to Migrate One-Time Password or This site maybe Disabled";
+    public static final String MIGRATE_OTP_CHANNEL_301 = "Failed to Get End-User: End-User Not Found";
+    public static final String MIGRATE_OTP_CHANNEL_402 = "Incorrect Input: End-User channel is not the same as input";
 }

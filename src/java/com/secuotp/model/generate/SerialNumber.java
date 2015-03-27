@@ -6,6 +6,7 @@
 package com.secuotp.model.generate;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -53,6 +54,26 @@ public class SerialNumber {
             b += 3;
         }
         return text;
+    }
+    
+    public static String generateMigrationCode(String seed) throws NoSuchAlgorithmException, UnsupportedEncodingException{
+        if(seed.length() < 16) {
+            seed = "0" + seed;
+        }
+        String sha1 = encrypt(seed, "SHA-1").toUpperCase();
+        String md5 = encrypt(seed, "MD5").toUpperCase();
+        
+        BigInteger sha1Long = new BigInteger(sha1, 16);
+        BigInteger md5Long = new BigInteger(md5, 16);
+        
+        BigInteger xorLong = sha1Long.shiftRight(10).xor((md5Long.shiftRight(10))).shiftLeft(24);
+        
+        String data = encrypt(xorLong.toString(16), "SHA-1");
+        String response = "";
+        for(int i = 0; i < 12; i++){
+            response += data.charAt(i);
+        }
+        return response.toUpperCase();
     }
 
     private static String encrypt(String seed, String method) throws NoSuchAlgorithmException, UnsupportedEncodingException {
