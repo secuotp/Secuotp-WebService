@@ -48,6 +48,8 @@ public class FunctionService {
                 xml += "<site-description>" + rs.getString(4) + "</site-description>";
                 xml += "<user-serial>" + rs.getString(5) + "</user-serial>";
                 xml += "<user-removal>" + rs.getString(6) + "</user-removal>";
+                xml += "<otp-length>" + rs.getInt(7) + "</otp-length>";
+                xml += "<otp-pattern>" + rs.getString(8) + "</otp-pattern>";
                 xml += "</secuotp>";
 
                 return xml;
