@@ -176,32 +176,25 @@ public class OtpService {
 
             if (Site.authenService(domain, serial) && !Site.checkDisabled(domain)) {
                 String username = parse.getDataFromTag("username", 0);
-                String channel = parse.getDataFromTag("channel", 0);
-                boolean channelBool = false;
-                if (channel.equalsIgnoreCase("mobile")) {
-                    channelBool = true;
-                }
 
                 Site site = Site.getSite(domain);
                 EndUser user = EndUser.getEndUser(username, domain);
 
                 if (user != null || site != null) {
-                    if ((user.getMobileMode() == true && channelBool != true) || (user.getMobileMode() != true && channelBool == true)) {
-                        return XMLCreate.createResponseXML(402, "Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_402).asXML();
+                    if (!user.getMobileMode()) {
+                        String migration = "";
+                        do {
+                            migration = SerialNumber.generateMigrationCode(serial + user.getSerialNumber() + "Secuotp");
+                        } while (!Migration.setMigrationCode(site.getSiteId(), user.getSiteUserId(), migration));
+
+                        XMLParameter param = new XMLParameter();
+                        param.add("username", user.getUsername());
+                        param.add("migration-code", migration);
+
+                        return XMLCreate.createResponseXMLWithData("Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_101, param).asXML();
+                    } else {
+                        return XMLCreate.createResponseXML(999, "Migrate One-Time Password Channel", "Wait Please Mobile to SMS Function").asXML();
                     }
-
-                    String migration = "";
-                    int count = 0;
-                    
-                    do {
-                        migration = SerialNumber.generateMigrationCode(serial + user.getSerialNumber() + "Secuotp" + count++);
-                    } while (!Migration.setMigrationCode(site.getSiteId(), user.getSiteUserId(), migration));
-                    
-                    XMLParameter param = new XMLParameter();
-                    param.add("username", user.getUsername());
-                    param.add("migration-code", migration);
-
-                    return XMLCreate.createResponseXMLWithData("Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_101, param).asXML();
                 }
                 return XMLCreate.createResponseXML(301, "Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_301).asXML();
             }

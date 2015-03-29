@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 
 /**
  *
@@ -57,7 +58,7 @@ public class SerialNumber {
     }
     
     public static String generateMigrationCode(String seed) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-        if(seed.length() < 16) {
+        if(seed.length() < 64) {
             seed = "0" + seed;
         }
         String sha1 = encrypt(seed, "SHA-1").toUpperCase();
@@ -65,9 +66,9 @@ public class SerialNumber {
         
         BigInteger sha1Long = new BigInteger(sha1, 16);
         BigInteger md5Long = new BigInteger(md5, 16);
-        
-        BigInteger xorLong = sha1Long.shiftRight(10).xor((md5Long.shiftRight(10))).shiftLeft(24);
-        
+        BigInteger currentTime = BigInteger.valueOf(new Date().getTime());
+        BigInteger xorLong = sha1Long.shiftRight(10).xor((md5Long.shiftRight(10))).shiftLeft(24).xor(currentTime);
+
         String data = encrypt(xorLong.toString(16), "SHA-1");
         String response = "";
         for(int i = 0; i < 12; i++){

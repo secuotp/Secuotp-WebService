@@ -21,6 +21,7 @@
             <web-resource-name>Database Service</web-resource-name>
             <description/>
             <url-pattern>/database/*</url-pattern>
+            <url-pattern>/function/*</url-pattern>
         </web-resource-collection>
         <user-data-constraint>
             <description/>

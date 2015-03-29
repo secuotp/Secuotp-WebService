@@ -285,19 +285,12 @@ public class StringText {
 "          <xs:complexType>\n" +
 "            <xs:sequence>\n" +
 "              <xs:element type=\"xs:string\" name=\"username\"/>\n" +
-"              <xs:element type=\"enum\" name=\"channel\"/>\n" +
 "            </xs:sequence>\n" +
 "          </xs:complexType>\n" +
 "        </xs:element>\n" +
 "      </xs:sequence>\n" +
 "    </xs:complexType>\n" +
 "  </xs:element>\n" +
-"  <xs:simpleType name=\"enum\">\n" +
-"    <xs:restriction  base=\"xs:string\">\n" +
-"        <xs:enumeration value=\"sms\" />\n" +
-"        <xs:enumeration value=\"mobile\" />\n" +
-"    </xs:restriction >\n" +
-"</xs:simpleType>\n" +
 "</xs:schema>";
     public static final String MIGRATE_OTP_CHANNEL_101 = "Migrate One-Time Password Success and received Migration Code";
     public static final String MIGRATE_OTP_CHANNEL_200 = "Failed to Migrate One-Time Password: General Failed";

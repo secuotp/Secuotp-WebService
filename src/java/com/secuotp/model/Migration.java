@@ -6,10 +6,13 @@
 package com.secuotp.model;
 
 import com.secuotp.model.connection.ConnectionAgent;
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLType;
 
 
 /**
@@ -20,22 +23,13 @@ public class Migration {
     public static  boolean setMigrationCode(String siteId, String userId, String code) throws ClassNotFoundException, SQLException{
         Connection con = ConnectionAgent.getInstance();
         
-        String chkSql = "SELECT count(*) FROM Migration where migration_code = ?";
-        String sql = "INSERT INTO Migration (site_id, end_user_id, migration_code) VALUES (?, ?, ?)";
+        String sql = "CALL insert_migration_code (?, ?, ?)";
         
-        PreparedStatement ps = con.prepareCall(chkSql);
-        ps.setString(1, code);
+        CallableStatement cs = con.prepareCall(sql);
+        cs.setInt(1, Integer.parseInt(siteId));
+        cs.setInt(2, Integer.parseInt(userId));
+        cs.setString(3, code);
         
-        ResultSet rs = ps.executeQuery();
-        if(!rs.next()){
-            ps = con.prepareCall(sql);
-            ps.setInt(1, Integer.parseInt(siteId));
-            ps.setInt(2, Integer.parseInt(userId));
-            ps.setString(3, code);
-        
-            int row = ps.executeUpdate();
-            return row > 0;
-        }
-        return false;
+        return cs.executeUpdate() > 0;
     }
 }
