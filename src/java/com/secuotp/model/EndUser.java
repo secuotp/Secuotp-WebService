@@ -216,4 +216,13 @@ public class EndUser extends People {
         cs.setString(7, param[4]);
         cs.execute();
     }
+    
+    public static boolean setEndUserSMSMode(String username, boolean mode) throws ClassNotFoundException, SQLException {
+        Connection con = ConnectionAgent.getInstance();
+        String sql = "UPDATE end_user SET mobile_mode = ? WHERE username = ?";
+        PreparedStatement ps = con.prepareCall(sql);
+        ps.setInt(1, mode ? 1 : 0);
+        ps.setString(2, username);
+        return ps.executeUpdate() > 0;
+    }
 }

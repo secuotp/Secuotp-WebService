@@ -5,15 +5,13 @@
  */
 package com.secuotp.services;
 
-import com.secuotp.model.EndUser;
 import com.secuotp.model.connection.ConnectionAgent;
-import java.sql.Blob;
+import com.secuotp.model.time.NTPTime;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.Callable;
+import java.util.Calendar;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -59,5 +57,14 @@ public class FunctionService {
         }
         return "<secuotp service=\"approveMigrate\" check=\"0\"><message>Approve Failed</message></secuotp>";
 
+    }
+ 
+    @POST
+    @Path("/Sync")
+    @Produces(MediaType.APPLICATION_XML)
+    public String timeSync() {
+        Calendar c = NTPTime.getNTPCalendar();
+        String xml = "<secuotp service\"timeSync\"><time>" + c.getTimeInMillis() + "</time></secuotp>";
+        return xml;
     }
 }

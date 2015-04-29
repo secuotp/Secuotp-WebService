@@ -292,6 +292,7 @@ public class StringText {
 "    </xs:complexType>\n" +
 "  </xs:element>\n" +
 "</xs:schema>";
+    public static final String MIGRATE_OTP_CHANNEL_100 = "Migrate One-Time Password Success (Mobile App -> SMS)";
     public static final String MIGRATE_OTP_CHANNEL_101 = "Migrate One-Time Password Success and received Migration Code";
     public static final String MIGRATE_OTP_CHANNEL_200 = "Failed to Migrate One-Time Password: General Failed";
     public static final String MIGRATE_OTP_CHANNEL_300 = "Failed to Migrate One-Time Password: Not Allowed to Migrate One-Time Password or This site maybe Disabled";

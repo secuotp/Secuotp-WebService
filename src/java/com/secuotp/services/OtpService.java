@@ -147,6 +147,9 @@ public class OtpService {
                     if (password.equalsIgnoreCase(totpAndRemaining[0])) {
                         executeProcedure(Integer.parseInt(site.getSiteId()));
 
+                        XMLParameter x = new XMLParameter();
+                        x.add("OTP", totpAndRemaining[0]);
+                    
                         return XMLCreate.createResponseXML(100, "Authenticate One-Time Password", StringText.AUTHENTICATE_OTP_100).asXML();
                     } else {
                         return XMLCreate.createResponseXML(303, "Authenticate One-Time Password", StringText.AUTHENTICATE_OTP_303).asXML();
@@ -193,8 +196,13 @@ public class OtpService {
 
                         return XMLCreate.createResponseXMLWithData("Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_101, param).asXML();
                     } else {
-                        
-                        return XMLCreate.createResponseXML(999, "Migrate One-Time Password Channel", "Wait Please Mobile to SMS Function").asXML();
+                        if(EndUser.setEndUserSMSMode(user.getUsername(), false)) {
+                            SmsSubmissionResult result = SMSSender.nexmoSMS("SecuOTP", user.getPhone(), site.getSiteName() + "\nYou Successfully Change OTP from Mobile Application to SMS");
+                            if(result.getStatus() == NEXMO_SUCCESS) {
+                                return XMLCreate.createResponseXML(100, "Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_100).asXML();
+                            }
+                        }
+                        return XMLCreate.createResponseXML(200, "Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_200).asXML();
                     }
                 }
                 return XMLCreate.createResponseXML(301, "Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_301).asXML();
