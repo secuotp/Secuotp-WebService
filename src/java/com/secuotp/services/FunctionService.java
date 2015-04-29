@@ -7,6 +7,7 @@ package com.secuotp.services;
 
 import com.secuotp.model.EndUser;
 import com.secuotp.model.connection.ConnectionAgent;
+import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,6 +51,7 @@ public class FunctionService {
                 xml += "<user-removal>" + rs.getString(6) + "</user-removal>";
                 xml += "<otp-length>" + rs.getInt(7) + "</otp-length>";
                 xml += "<otp-pattern>" + rs.getString(8) + "</otp-pattern>";
+                xml += "<image>" + rs.getString(9) + "</image>";
                 xml += "</secuotp>";
 
                 return xml;

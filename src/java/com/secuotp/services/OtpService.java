@@ -193,6 +193,7 @@ public class OtpService {
 
                         return XMLCreate.createResponseXMLWithData("Migrate One-Time Password Channel", StringText.MIGRATE_OTP_CHANNEL_101, param).asXML();
                     } else {
+                        
                         return XMLCreate.createResponseXML(999, "Migrate One-Time Password Channel", "Wait Please Mobile to SMS Function").asXML();
                     }
                 }
