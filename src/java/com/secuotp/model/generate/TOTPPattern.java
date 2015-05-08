@@ -156,7 +156,7 @@ public class TOTPPattern {
     public static String[] generateActualTOTP(int delayMin, int delaySec, String userSerial, String siteStrial, String pattern, int length, String timeZone) throws NoSuchAlgorithmException {
         Calendar c = NTPTime.reformatTime(NTPTime.getNTPCalendar(), 0, delayMin, delaySec);
 
-        String totp = TOTP.getOTP(userSerial, siteStrial, c, 8);
+        String totp = TOTP.getOTP(userSerial, siteStrial, c, length);
         totp = TOTPPattern.toPattern(totp, pattern);
         totp = TOTPPattern.toSize(totp, length, pattern);
 

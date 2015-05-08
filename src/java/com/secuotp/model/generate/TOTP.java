@@ -94,8 +94,17 @@ public class TOTP {
             // then key = A-B-C
             long privateKey = TOTP.str2num(userSerial + " " + siteSerial + " " +"SecuOTP");
             String key = toHex(userSerial + "-" + siteSerial + "-" + TOTP.hmacSHA1("" + privateKey, "SecuOTP"));
+            
+            if(key.length() > 100) {
+                key = key.substring(0, 100);
+            } else if (key.length() < 100) {
+                while(key.length() < 100) {
+                    key = "0" + key;
+                }
+            }
+            
             String otp = generateTOTP(key, "" + time.getTimeInMillis(), digit);
-
+            
             return otp;
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(TOTP.class.getName()).log(Level.SEVERE, null, ex);

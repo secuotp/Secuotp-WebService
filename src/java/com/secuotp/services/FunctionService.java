@@ -60,11 +60,11 @@ public class FunctionService {
     }
  
     @POST
-    @Path("/Sync")
+    @Path("/sync")
     @Produces(MediaType.APPLICATION_XML)
     public String timeSync() {
         Calendar c = NTPTime.getNTPCalendar();
-        String xml = "<secuotp service\"timeSync\"><time>" + c.getTimeInMillis() + "</time></secuotp>";
+        String xml = "<secuotp service=\"timeSync\"><time>" + c.getTimeInMillis() + "</time></secuotp>";
         return xml;
     }
 }
